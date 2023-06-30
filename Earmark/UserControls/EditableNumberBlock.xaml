@@ -1,0 +1,39 @@
+<UserControl x:Class="Earmark.UserControls.EditableNumberBlock"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="using:Earmark.UserControls"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:aktoolkit="using:AK.Toolkit.WinUI3"
+             xmlns:conv="using:Earmark.Converters"
+             mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <conv:DecimalToDoubleConverter x:Key="DecimalToDoubleConverter" />
+    </UserControl.Resources>
+
+    <Grid Height="32">
+
+        <TextBlock x:Name="TextBlock"
+                   Margin="8 0"
+                   HorizontalAlignment="Stretch"
+                   VerticalAlignment="Center"
+                   TextAlignment="Right"
+                   Text="{x:Bind NumberBox.Text, Mode=OneWay}"
+                   Foreground="{x:Bind GetForegroundBrush(Value), Mode=OneWay}"
+                   DoubleTapped="TextBlock_DoubleTapped" />
+
+        <aktoolkit:NumberBoxEx x:Name="NumberBox"
+                               Grid.Column="0"
+                               Background="Transparent"
+                               HorizontalAlignment="Stretch"
+                               VerticalAlignment="Stretch"
+                               AcceptsExpression="True"
+                               NumberHorizontalAlignment="Right"
+                               IsDeleteButtonVisible="False"
+                               Value="{x:Bind Value, Mode=TwoWay, Converter={StaticResource DecimalToDoubleConverter}}"
+                               Loaded="NumberBox_Loaded" />
+
+    </Grid>
+
+</UserControl>

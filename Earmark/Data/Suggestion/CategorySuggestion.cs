@@ -1,0 +1,23 @@
+﻿using Earmark.Backend.Models;
+using System;
+
+namespace Earmark.Data.Suggestion
+{
+    public class CategorySuggestion : ISuggestion
+    {
+        private Category _category;
+
+        public Guid? Id => _category?.Id;
+
+        public string Name => _category?.Name ?? string.Empty;
+
+        public string QueryableName => _category?.Name ?? string.Empty;
+
+        public string GroupName => _category?.Group?.Name ?? string.Empty;
+
+        public CategorySuggestion(Category category)
+        {
+            _category = category;
+        }
+    }
+}

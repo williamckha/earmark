@@ -1,0 +1,152 @@
+<UserControl x:Class="Earmark.UserControls.Budget.BudgetMonthControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="using:Earmark.UserControls.Budget"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Earmark.ViewModels.Budget"
+             xmlns:conv="using:Earmark.Converters"
+             xmlns:uc="using:Earmark.UserControls"
+             mc:Ignorable="d">
+
+    <UserControl.Resources>
+
+        <Style x:Key="SubtotalTextBlockStyle"
+               TargetType="TextBlock">
+            <Setter Property="Margin"
+                    Value="8 0 8 2" />
+            <Setter Property="HorizontalAlignment"
+                    Value="Right" />
+            <Setter Property="VerticalAlignment"
+                    Value="Center" />
+            <Setter Property="FontWeight"
+                    Value="SemiBold" />
+        </Style>
+
+    </UserControl.Resources>
+
+    <Grid>
+
+        <ListView ItemsSource="{x:Bind ViewModel.CategoryGroupsCVS.View, Mode=OneWay}"
+                  SelectionMode="None">
+
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="Margin"
+                            Value="0" />
+                    <Setter Property="Padding"
+                            Value="0" />
+                    <Setter Property="MinHeight"
+                            Value="0" />
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="ListViewItem">
+                                <ContentPresenter Content="{TemplateBinding Content}" />
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </ListView.ItemContainerStyle>
+
+            <ListView.ItemContainerTransitions>
+                <TransitionCollection>
+                    <ReorderThemeTransition />
+                </TransitionCollection>
+            </ListView.ItemContainerTransitions>
+
+            <ListView.GroupStyle>
+                <GroupStyle>
+
+                    <GroupStyle.HeaderContainerStyle>
+                        <Style TargetType="ListViewHeaderItem">
+                            <Setter Property="FontSize"
+                                    Value="{ThemeResource BodyTextBlockFontSize}" />
+                            <Setter Property="Margin"
+                                    Value="0" />
+                            <Setter Property="Padding"
+                                    Value="0" />
+                            <Setter Property="MinHeight"
+                                    Value="0" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListViewHeaderItem">
+                                        <ContentPresenter Content="{TemplateBinding Content}" />
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </GroupStyle.HeaderContainerStyle>
+
+                    <GroupStyle.HeaderTemplate>
+                        <DataTemplate x:DataType="vm:BudgetMonthCategoryGroupViewModel">
+
+                            <Grid Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                                  Height="32">
+
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition />
+                                    <ColumnDefinition />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0"
+                                           Style="{ThemeResource SubtotalTextBlockStyle}"
+                                           Text="{x:Bind conv:CurrencyFormatConverter.DecimalToString(TotalBudgeted), Mode=OneWay}" />
+
+                                <TextBlock Grid.Column="1"
+                                           Style="{ThemeResource SubtotalTextBlockStyle}"
+                                           Text="{x:Bind conv:CurrencyFormatConverter.DecimalToString(TotalActivity), Mode=OneWay}" />
+
+                                <TextBlock Grid.Column="2"
+                                           Style="{ThemeResource SubtotalTextBlockStyle}"
+                                           Text="{x:Bind conv:CurrencyFormatConverter.DecimalToString(TotalBalance), Mode=OneWay}"
+                                           Foreground="{x:Bind conv:DecimalToBrushConverter.GetRedWhenNegativeForegroundBrush(TotalBalance), Mode=OneWay}" />
+
+                            </Grid>
+
+                        </DataTemplate>
+                    </GroupStyle.HeaderTemplate>
+
+                </GroupStyle>
+            </ListView.GroupStyle>
+
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="vm:BudgetMonthCategoryViewModel">
+
+                    <Grid Height="32">
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+
+                        <uc:EditableNumberBlock Grid.Column="0"
+                                                Value="{x:Bind TotalBudgeted, Mode=TwoWay}" />
+
+                        <TextBlock Grid.Column="1"
+                                   Margin="8 0"
+                                   HorizontalAlignment="Stretch"
+                                   VerticalAlignment="Center"
+                                   TextAlignment="Right"
+                                   Text="{x:Bind conv:CurrencyFormatConverter.DecimalToString(TotalActivity)}"
+                                   Foreground="{x:Bind local:BudgetMonthControl.GetCategoryActivityForegroundBrush(TotalActivity)}" />
+
+                        <TextBlock Grid.Column="2"
+                                   Margin="8 0"
+                                   HorizontalAlignment="Stretch"
+                                   VerticalAlignment="Center"
+                                   TextAlignment="Right"
+                                   Text="{x:Bind conv:CurrencyFormatConverter.DecimalToString(TotalBalance), Mode=OneWay}"
+                                   Foreground="{x:Bind local:BudgetMonthControl.GetCategoryBalanceForegroundBrush(TotalBalance), Mode=OneWay}" />
+
+                    </Grid>
+
+                </DataTemplate>
+            </ListView.ItemTemplate>
+
+        </ListView>
+
+    </Grid>
+
+</UserControl>

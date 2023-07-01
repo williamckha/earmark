@@ -79,6 +79,8 @@ namespace Earmark
                 .AddSingleton<ICategoriesService, CategoriesService>()
                 .AddSingleton<IPayeeService, PayeeService>()
 
+                
+
                 .BuildServiceProvider();
         }
     }

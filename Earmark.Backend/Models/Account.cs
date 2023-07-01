@@ -12,7 +12,6 @@ namespace Earmark.Backend.Models
 
         public List<Transaction> Transactions { get; set; }
 
-        [Required]
         public Payee TransferPayee { get; set; }
     }
 }

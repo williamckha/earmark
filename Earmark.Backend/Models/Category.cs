@@ -43,11 +43,6 @@ namespace Earmark.Backend.Models
         public List<BalanceAmount> BalanceAmounts { get; set; }
 
         /// <summary>
-        /// The rollover amounts associated with the category.
-        /// </summary>
-        public List<RolloverAmount> RolloverAmounts { get; set; }
-
-        /// <summary>
         /// The transactions under the category.
         /// </summary>
         public List<Transaction> Transactions { get; set; }

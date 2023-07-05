@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
-using System;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -97,6 +97,7 @@ namespace Earmark.Backend.Migrations
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     Amount = table.Column<int>(type: "INTEGER", nullable: false),
+                    RolloverAmount = table.Column<int>(type: "INTEGER", nullable: false),
                     MonthId = table.Column<Guid>(type: "TEXT", nullable: false),
                     CategoryId = table.Column<Guid>(type: "TEXT", nullable: false)
                 },
@@ -137,32 +138,6 @@ namespace Earmark.Backend.Migrations
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_BudgetedAmounts_Categories_CategoryId",
-                        column: x => x.CategoryId,
-                        principalTable: "Categories",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "RolloverAmounts",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Amount = table.Column<int>(type: "INTEGER", nullable: false),
-                    MonthId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    CategoryId = table.Column<Guid>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_RolloverAmounts", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_RolloverAmounts_BudgetMonths_MonthId",
-                        column: x => x.MonthId,
-                        principalTable: "BudgetMonths",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_RolloverAmounts_Categories_CategoryId",
                         column: x => x.CategoryId,
                         principalTable: "Categories",
                         principalColumn: "Id",
@@ -234,16 +209,6 @@ namespace Earmark.Backend.Migrations
                 column: "GroupId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RolloverAmounts_CategoryId",
-                table: "RolloverAmounts",
-                column: "CategoryId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RolloverAmounts_MonthId",
-                table: "RolloverAmounts",
-                column: "MonthId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Transactions_AccountId",
                 table: "Transactions",
                 column: "AccountId");
@@ -273,9 +238,6 @@ namespace Earmark.Backend.Migrations
 
             migrationBuilder.DropTable(
                 name: "BudgetedAmounts");
-
-            migrationBuilder.DropTable(
-                name: "RolloverAmounts");
 
             migrationBuilder.DropTable(
                 name: "Transactions");

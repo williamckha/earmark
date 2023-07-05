@@ -94,7 +94,6 @@ namespace Earmark.Backend.Services
                 foreach (var budgetMonthId in budgetMonthIds)
                 {
                     _budgetService.AddBalanceAmount(budgetMonthId, category.Id, 0);
-                    _budgetService.AddRolloverAmount(budgetMonthId, category.Id, 0);
                 }
 
                 dbContextScope.SaveChanges();

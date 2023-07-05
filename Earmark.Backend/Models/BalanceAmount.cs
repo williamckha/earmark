@@ -16,6 +16,12 @@ namespace Earmark.Backend.Models
         public int Amount { get; set; }
 
         /// <summary>
+        /// The part of the balance amount for the month in the category that was
+        /// rolled over from previous months.
+        /// </summary>
+        public int RolloverAmount { get; set; }
+
+        /// <summary>
         /// The month associated with the balance amount.
         /// </summary>
         [Required]

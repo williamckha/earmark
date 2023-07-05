@@ -73,15 +73,6 @@ namespace Earmark.Backend.Services
         BalanceAmount AddBalanceAmount(Guid budgetMonthId, Guid categoryId, int amount);
 
         /// <summary>
-        /// Adds a rollover amount for the specified month and category.
-        /// </summary>
-        /// <param name="budgetMonthId">The ID of the budget month.</param>
-        /// <param name="categoryId">The ID of the category.</param>
-        /// <param name="amount">The amount in the category that was rolled over into the month.</param>
-        /// <returns>The added rollover amount.</returns>
-        RolloverAmount AddRolloverAmount(Guid budgetMonthId, Guid categoryId, int amount);
-
-        /// <summary>
         /// Adds a budgeted amount for the specified month and category.
         /// </summary>
         /// <param name="budgetMonthId">The ID of the budget month.</param>

@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Earmark.Backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20230705002237_InitialCreate")]
+    [Migration("20230705045919_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -50,6 +50,9 @@ namespace Earmark.Backend.Migrations
 
                     b.Property<Guid>("MonthId")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("RolloverAmount")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -163,30 +166,6 @@ namespace Earmark.Backend.Migrations
                     b.ToTable("Payees");
                 });
 
-            modelBuilder.Entity("Earmark.Backend.Models.RolloverAmount", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Amount")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<Guid>("CategoryId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("MonthId")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CategoryId");
-
-                    b.HasIndex("MonthId");
-
-                    b.ToTable("RolloverAmounts");
-                });
-
             modelBuilder.Entity("Earmark.Backend.Models.Transaction", b =>
                 {
                     b.Property<Guid>("Id")
@@ -288,25 +267,6 @@ namespace Earmark.Backend.Migrations
                     b.Navigation("Group");
                 });
 
-            modelBuilder.Entity("Earmark.Backend.Models.RolloverAmount", b =>
-                {
-                    b.HasOne("Earmark.Backend.Models.Category", "Category")
-                        .WithMany("RolloverAmounts")
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Earmark.Backend.Models.BudgetMonth", "Month")
-                        .WithMany("RolloverAmounts")
-                        .HasForeignKey("MonthId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Category");
-
-                    b.Navigation("Month");
-                });
-
             modelBuilder.Entity("Earmark.Backend.Models.Transaction", b =>
                 {
                     b.HasOne("Earmark.Backend.Models.Account", "Account")
@@ -346,8 +306,6 @@ namespace Earmark.Backend.Migrations
                     b.Navigation("BalanceAmounts");
 
                     b.Navigation("BudgetedAmounts");
-
-                    b.Navigation("RolloverAmounts");
                 });
 
             modelBuilder.Entity("Earmark.Backend.Models.Category", b =>
@@ -355,8 +313,6 @@ namespace Earmark.Backend.Migrations
                     b.Navigation("BalanceAmounts");
 
                     b.Navigation("BudgetedAmounts");
-
-                    b.Navigation("RolloverAmounts");
 
                     b.Navigation("Transactions");
                 });

@@ -23,8 +23,6 @@ namespace Earmark.Backend.Database
 
         public DbSet<BalanceAmount> BalanceAmounts { get; set; }
 
-        public DbSet<RolloverAmount> RolloverAmounts { get; set; }
-
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             var connectionStringBuilder = new SqliteConnectionStringBuilder();

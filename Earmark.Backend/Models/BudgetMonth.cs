@@ -34,10 +34,5 @@ namespace Earmark.Backend.Models
         /// The balance amounts for the month.
         /// </summary>
         public List<BalanceAmount> BalanceAmounts { get; set; }
-
-        /// <summary>
-        /// The rollover amounts for the month.
-        /// </summary>
-        public List<RolloverAmount> RolloverAmounts { get; set; }
     }
 }

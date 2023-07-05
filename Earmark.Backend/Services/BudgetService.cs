@@ -3,9 +3,7 @@ using Earmark.Backend.Models;
 using EntityFramework.DbContextScope.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using Windows.UI;
 
 namespace Earmark.Backend.Services
 {
@@ -316,7 +314,7 @@ namespace Earmark.Backend.Services
                     .ThenBy(x => x.Month)
                     .ToList();
 
-                // Get all months at or after the specified month.
+                // Get all months on or after the specified month.
                 var budgetMonthsToUpdate = budgetMonths
                     .Where(x => (x.Month >= month && x.Year == year) || (x.Year > year));
 

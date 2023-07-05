@@ -7,15 +7,15 @@ namespace Earmark.Backend.Services
     public interface ICategoriesService
     {
         /// <summary>
-        /// Gets all category groups.
+        /// Gets all category groups in the database.
         /// </summary>
-        /// <returns>All the category groups.</returns>
+        /// <returns>All the category groups in the database.</returns>
         IEnumerable<CategoryGroup> GetCategoryGroups();
 
         /// <summary>
-        /// Gets all categories.
+        /// Gets all categories in the database.
         /// </summary>
-        /// <returns>All the categories.</returns>
+        /// <returns>All the categories in the database.</returns>
         IEnumerable<Category> GetCategories();
 
         /// <summary>

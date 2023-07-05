@@ -5,7 +5,6 @@ using Earmark.Backend.Models;
 using Earmark.Backend.Services;
 using Earmark.Data.Messages;
 using Earmark.Helpers.Validation;
-using Earmark.ViewModels.Account;
 using System;
 using System.Collections.ObjectModel;
 

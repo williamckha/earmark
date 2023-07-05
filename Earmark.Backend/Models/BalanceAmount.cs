@@ -11,7 +11,7 @@ namespace Earmark.Backend.Models
         public Guid Id { get; set; }
 
         /// <summary>
-        /// The balance in the category for the month.
+        /// The balance for the month in the category.
         /// </summary>
         public int Amount { get; set; }
 

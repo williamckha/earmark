@@ -7,9 +7,9 @@ namespace Earmark.Backend.Services
     public interface IPayeeService
     {
         /// <summary>
-        /// Gets all payees.
+        /// Gets all payees in the database.
         /// </summary>
-        /// <returns>All the payees.</returns>
+        /// <returns>All the payees in the database.</returns>
         IEnumerable<Payee> GetPayees();
 
         /// <summary>

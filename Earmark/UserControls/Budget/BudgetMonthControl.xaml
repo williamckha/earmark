@@ -100,7 +100,7 @@
                                 <TextBlock Grid.Column="2"
                                            Style="{ThemeResource SubtotalTextBlockStyle}"
                                            Text="{x:Bind conv:CurrencyFormatConverter.CurrencyIntegerToString(TotalBalance), Mode=OneWay}"
-                                           Foreground="{x:Bind conv:DecimalToBrushConverter.GetRedWhenNegativeForegroundBrush(TotalBalance), Mode=OneWay}" />
+                                           Foreground="{x:Bind conv:IntegerToBrushConverter.GetRedWhenNegativeForegroundBrush(TotalBalance), Mode=OneWay}" />
 
                             </Grid>
 

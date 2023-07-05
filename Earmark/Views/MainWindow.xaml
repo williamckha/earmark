@@ -90,7 +90,7 @@
                                        Text="{x:Bind Name}" />
                             <TextBlock Grid.Column="1"
                                        FontWeight="SemiBold"
-                                       Foreground="{x:Bind conv:DecimalToBrushConverter.GetConditionalWithFadedZeroForegroundBrush(TotalBalance), Mode=OneWay}"
+                                       Foreground="{x:Bind conv:IntegerToBrushConverter.GetConditionalWithFadedZeroForegroundBrush(TotalBalance), Mode=OneWay}"
                                        Text="{x:Bind conv:CurrencyFormatConverter.CurrencyIntegerToString(TotalBalance), Mode=OneWay}" />
                         </Grid>
                     </NavigationViewItem>
@@ -109,7 +109,7 @@
                                        Text="{x:Bind Name}" />
                             <TextBlock Grid.Column="1"
                                        FontWeight="SemiBold"
-                                       Foreground="{x:Bind conv:DecimalToBrushConverter.GetConditionalWithFadedZeroForegroundBrush(TotalBalance), Mode=OneWay}"
+                                       Foreground="{x:Bind conv:IntegerToBrushConverter.GetConditionalWithFadedZeroForegroundBrush(TotalBalance), Mode=OneWay}"
                                        Text="{x:Bind conv:CurrencyFormatConverter.CurrencyIntegerToString(TotalBalance), Mode=OneWay}" />
                         </Grid>
                     </NavigationViewItem>

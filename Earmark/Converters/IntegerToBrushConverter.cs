@@ -2,7 +2,7 @@
 
 namespace Earmark.Converters
 {
-    public static class DecimalToBrushConverter
+    public static class IntegerToBrushConverter
     {
         public static SolidColorBrush GetConditionalForegroundBrush(int value)
         {

@@ -22,7 +22,7 @@
                        Text="{x:Bind ViewModel.AccountName}" />
             <TextBlock Style="{ThemeResource TitleTextBlockStyle}"
                        Text="{x:Bind conv:CurrencyFormatConverter.CurrencyIntegerToString(ViewModel.TotalBalance), Mode=OneWay}"
-                       Foreground="{x:Bind conv:DecimalToBrushConverter.GetConditionalWithFadedZeroForegroundBrush(ViewModel.TotalBalance), Mode=OneWay}" />
+                       Foreground="{x:Bind conv:IntegerToBrushConverter.GetConditionalWithFadedZeroForegroundBrush(ViewModel.TotalBalance), Mode=OneWay}" />
         </StackPanel>
 
         <Grid Grid.Row="1"

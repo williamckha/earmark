@@ -66,7 +66,7 @@ namespace Earmark.UserControls
         {
             if (IsForegroundConditional)
             {
-                return DecimalToBrushConverter.GetConditionalForegroundBrush(value);
+                return IntegerToBrushConverter.GetConditionalForegroundBrush(value);
             }
             return App.Current.Resources["TextFillColorPrimaryBrush"] as SolidColorBrush;
         }

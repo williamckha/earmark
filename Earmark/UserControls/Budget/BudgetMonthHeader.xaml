@@ -164,12 +164,12 @@
 
             <TextBlock TextAlignment="Center"
                        Style="{ThemeResource TitleTextBlockStyle}"
-                       Foreground="{x:Bind conv:DecimalToBrushConverter.GetConditionalForegroundBrush(ViewModel.TotalUnbudgeted), Mode=OneWay}"
+                       Foreground="{x:Bind conv:IntegerToBrushConverter.GetConditionalForegroundBrush(ViewModel.TotalUnbudgeted), Mode=OneWay}"
                        Text="{x:Bind conv:CurrencyFormatConverter.CurrencyIntegerToString(ViewModel.TotalUnbudgeted), Mode=OneWay}" />
 
             <TextBlock TextAlignment="Center"
                        Style="{ThemeResource CaptionTextBlockStyle}"
-                       Foreground="{x:Bind conv:DecimalToBrushConverter.GetConditionalForegroundBrush(ViewModel.TotalUnbudgeted), Mode=OneWay}"
+                       Foreground="{x:Bind conv:IntegerToBrushConverter.GetConditionalForegroundBrush(ViewModel.TotalUnbudgeted), Mode=OneWay}"
                        Text="{x:Bind GetTotalUnbudgetedLabel(ViewModel.TotalUnbudgeted), Mode=OneWay}" />
 
         </StackPanel>
@@ -247,7 +247,7 @@
                        Grid.Column="2"
                        Style="{ThemeResource TotalTextBlockStyle}"
                        Text="{x:Bind conv:CurrencyFormatConverter.CurrencyIntegerToString(ViewModel.TotalBalance), Mode=OneWay}"
-                       Foreground="{x:Bind conv:DecimalToBrushConverter.GetRedWhenNegativeForegroundBrush(ViewModel.TotalBalance), Mode=OneWay}" />
+                       Foreground="{x:Bind conv:IntegerToBrushConverter.GetRedWhenNegativeForegroundBrush(ViewModel.TotalBalance), Mode=OneWay}" />
 
         </Grid>
 

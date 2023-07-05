@@ -146,8 +146,7 @@
                             <MenuFlyout>
                                 <MenuFlyoutItem x:Uid="CategoryRowContextMenu_DeleteCategory"
                                                 Icon="{ui:FontIcon FontFamily={StaticResource SymbolThemeFontFamily}, Glyph=&#xE74D;}"
-                                                Command="{x:Bind Group.RemoveCategoryCommand}"
-                                                CommandParameter="{x:Bind}" />
+                                                Command="{x:Bind RemoveCategoryCommand}" />
                             </MenuFlyout>
                         </Grid.ContextFlyout>
 

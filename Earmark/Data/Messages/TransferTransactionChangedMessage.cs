@@ -1,15 +1,16 @@
 ﻿using Earmark.Backend.Models;
+using Earmark.ViewModels.Account;
 
 namespace Earmark.Data.Messages
 {
-    public class TransferTransactionChangedMessage 
+    public class TransferTransactionChangedMessage
     {
-        public Transaction OldTransferTransaction { get; }
+        public TransactionViewModel OldTransferTransaction { get; }
 
         public Transaction NewTransferTransaction { get; }
 
         public TransferTransactionChangedMessage(
-            Transaction oldTransferTransaction, Transaction newTransferTransaction)
+            TransactionViewModel oldTransferTransaction, Transaction newTransferTransaction)
         {
             OldTransferTransaction = oldTransferTransaction;
             NewTransferTransaction = newTransferTransaction;

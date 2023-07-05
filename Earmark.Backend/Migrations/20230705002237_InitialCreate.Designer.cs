@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Earmark.Backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20230701011255_InitialCreate")]
+    [Migration("20230705002237_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -28,6 +28,9 @@ namespace Earmark.Backend.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("TotalBalance")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.ToTable("Accounts");
@@ -39,8 +42,8 @@ namespace Earmark.Backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Amount")
+                        .HasColumnType("INTEGER");
 
                     b.Property<Guid>("CategoryId")
                         .HasColumnType("TEXT");
@@ -54,18 +57,7 @@ namespace Earmark.Backend.Migrations
 
                     b.HasIndex("MonthId");
 
-                    b.ToTable("BalanceAmount");
-                });
-
-            modelBuilder.Entity("Earmark.Backend.Models.Budget", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Budgets");
+                    b.ToTable("BalanceAmounts");
                 });
 
             modelBuilder.Entity("Earmark.Backend.Models.BudgetMonth", b =>
@@ -74,23 +66,18 @@ namespace Earmark.Backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("BudgetId")
-                        .HasColumnType("TEXT");
-
                     b.Property<int>("Month")
                         .HasColumnType("INTEGER");
 
-                    b.Property<decimal>("TotalUnbudgeted")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("TotalUnbudgeted")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Year")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BudgetId");
-
-                    b.ToTable("BudgetMonth");
+                    b.ToTable("BudgetMonths");
                 });
 
             modelBuilder.Entity("Earmark.Backend.Models.BudgetedAmount", b =>
@@ -99,8 +86,8 @@ namespace Earmark.Backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Amount")
+                        .HasColumnType("INTEGER");
 
                     b.Property<Guid>("CategoryId")
                         .HasColumnType("TEXT");
@@ -114,7 +101,7 @@ namespace Earmark.Backend.Migrations
 
                     b.HasIndex("MonthId");
 
-                    b.ToTable("BudgetedAmount");
+                    b.ToTable("BudgetedAmounts");
                 });
 
             modelBuilder.Entity("Earmark.Backend.Models.Category", b =>
@@ -139,16 +126,13 @@ namespace Earmark.Backend.Migrations
 
                     b.HasIndex("GroupId");
 
-                    b.ToTable("Category");
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("Earmark.Backend.Models.CategoryGroup", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("BudgetId")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsIncome")
@@ -162,9 +146,7 @@ namespace Earmark.Backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BudgetId");
-
-                    b.ToTable("CategoryGroup");
+                    b.ToTable("CategoryGroups");
                 });
 
             modelBuilder.Entity("Earmark.Backend.Models.Payee", b =>
@@ -187,8 +169,8 @@ namespace Earmark.Backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Amount")
+                        .HasColumnType("INTEGER");
 
                     b.Property<Guid>("CategoryId")
                         .HasColumnType("TEXT");
@@ -202,7 +184,7 @@ namespace Earmark.Backend.Migrations
 
                     b.HasIndex("MonthId");
 
-                    b.ToTable("RolloverAmount");
+                    b.ToTable("RolloverAmounts");
                 });
 
             modelBuilder.Entity("Earmark.Backend.Models.Transaction", b =>
@@ -214,13 +196,13 @@ namespace Earmark.Backend.Migrations
                     b.Property<Guid>("AccountId")
                         .HasColumnType("TEXT");
 
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Amount")
+                        .HasColumnType("INTEGER");
 
                     b.Property<Guid?>("CategoryId")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset>("Date")
+                    b.Property<DateTime>("Date")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Memo")
@@ -240,9 +222,10 @@ namespace Earmark.Backend.Migrations
 
                     b.HasIndex("PayeeId");
 
-                    b.HasIndex("TransferTransactionId");
+                    b.HasIndex("TransferTransactionId")
+                        .IsUnique();
 
-                    b.ToTable("Transaction");
+                    b.ToTable("Transactions");
                 });
 
             modelBuilder.Entity("Earmark.Backend.Models.Account", b =>
@@ -275,17 +258,6 @@ namespace Earmark.Backend.Migrations
                     b.Navigation("Month");
                 });
 
-            modelBuilder.Entity("Earmark.Backend.Models.BudgetMonth", b =>
-                {
-                    b.HasOne("Earmark.Backend.Models.Budget", "Budget")
-                        .WithMany("Months")
-                        .HasForeignKey("BudgetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Budget");
-                });
-
             modelBuilder.Entity("Earmark.Backend.Models.BudgetedAmount", b =>
                 {
                     b.HasOne("Earmark.Backend.Models.Category", "Category")
@@ -314,17 +286,6 @@ namespace Earmark.Backend.Migrations
                         .IsRequired();
 
                     b.Navigation("Group");
-                });
-
-            modelBuilder.Entity("Earmark.Backend.Models.CategoryGroup", b =>
-                {
-                    b.HasOne("Earmark.Backend.Models.Budget", "Budget")
-                        .WithMany("CategoryGroups")
-                        .HasForeignKey("BudgetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Budget");
                 });
 
             modelBuilder.Entity("Earmark.Backend.Models.RolloverAmount", b =>
@@ -363,8 +324,8 @@ namespace Earmark.Backend.Migrations
                         .HasForeignKey("PayeeId");
 
                     b.HasOne("Earmark.Backend.Models.Transaction", "TransferTransaction")
-                        .WithMany()
-                        .HasForeignKey("TransferTransactionId");
+                        .WithOne()
+                        .HasForeignKey("Earmark.Backend.Models.Transaction", "TransferTransactionId");
 
                     b.Navigation("Account");
 
@@ -378,13 +339,6 @@ namespace Earmark.Backend.Migrations
             modelBuilder.Entity("Earmark.Backend.Models.Account", b =>
                 {
                     b.Navigation("Transactions");
-                });
-
-            modelBuilder.Entity("Earmark.Backend.Models.Budget", b =>
-                {
-                    b.Navigation("CategoryGroups");
-
-                    b.Navigation("Months");
                 });
 
             modelBuilder.Entity("Earmark.Backend.Models.BudgetMonth", b =>

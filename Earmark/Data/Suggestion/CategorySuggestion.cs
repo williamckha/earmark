@@ -13,8 +13,6 @@ namespace Earmark.Data.Suggestion
 
         public string QueryableName => _category?.Name ?? string.Empty;
 
-        public string GroupName => _category?.Group?.Name ?? string.Empty;
-
         public CategorySuggestion(Category category)
         {
             _category = category;

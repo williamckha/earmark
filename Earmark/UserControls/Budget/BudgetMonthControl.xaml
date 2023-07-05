@@ -91,15 +91,15 @@
 
                                 <TextBlock Grid.Column="0"
                                            Style="{ThemeResource SubtotalTextBlockStyle}"
-                                           Text="{x:Bind conv:CurrencyFormatConverter.DecimalToString(TotalBudgeted), Mode=OneWay}" />
+                                           Text="{x:Bind conv:CurrencyFormatConverter.CurrencyIntegerToString(TotalBudgeted), Mode=OneWay}" />
 
                                 <TextBlock Grid.Column="1"
                                            Style="{ThemeResource SubtotalTextBlockStyle}"
-                                           Text="{x:Bind conv:CurrencyFormatConverter.DecimalToString(TotalActivity), Mode=OneWay}" />
+                                           Text="{x:Bind conv:CurrencyFormatConverter.CurrencyIntegerToString(TotalActivity), Mode=OneWay}" />
 
                                 <TextBlock Grid.Column="2"
                                            Style="{ThemeResource SubtotalTextBlockStyle}"
-                                           Text="{x:Bind conv:CurrencyFormatConverter.DecimalToString(TotalBalance), Mode=OneWay}"
+                                           Text="{x:Bind conv:CurrencyFormatConverter.CurrencyIntegerToString(TotalBalance), Mode=OneWay}"
                                            Foreground="{x:Bind conv:DecimalToBrushConverter.GetRedWhenNegativeForegroundBrush(TotalBalance), Mode=OneWay}" />
 
                             </Grid>
@@ -129,7 +129,7 @@
                                    HorizontalAlignment="Stretch"
                                    VerticalAlignment="Center"
                                    TextAlignment="Right"
-                                   Text="{x:Bind conv:CurrencyFormatConverter.DecimalToString(TotalActivity)}"
+                                   Text="{x:Bind conv:CurrencyFormatConverter.CurrencyIntegerToString(TotalActivity)}"
                                    Foreground="{x:Bind local:BudgetMonthControl.GetCategoryActivityForegroundBrush(TotalActivity)}" />
 
                         <TextBlock Grid.Column="2"
@@ -137,7 +137,7 @@
                                    HorizontalAlignment="Stretch"
                                    VerticalAlignment="Center"
                                    TextAlignment="Right"
-                                   Text="{x:Bind conv:CurrencyFormatConverter.DecimalToString(TotalBalance), Mode=OneWay}"
+                                   Text="{x:Bind conv:CurrencyFormatConverter.CurrencyIntegerToString(TotalBalance), Mode=OneWay}"
                                    Foreground="{x:Bind local:BudgetMonthControl.GetCategoryBalanceForegroundBrush(TotalBalance), Mode=OneWay}" />
 
                     </Grid>

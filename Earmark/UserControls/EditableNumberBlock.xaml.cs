@@ -12,11 +12,11 @@ namespace Earmark.UserControls
     public sealed partial class EditableNumberBlock : UserControl
     {
         public static readonly DependencyProperty ValueProperty =
-            DependencyProperty.Register(nameof(Value), typeof(decimal), typeof(EditableNumberBlock), new PropertyMetadata(0));
+            DependencyProperty.Register(nameof(Value), typeof(int), typeof(EditableNumberBlock), new PropertyMetadata(0));
         
-        public decimal Value
+        public int Value
         {
-            get => Convert.ToDecimal(GetValue(ValueProperty));
+            get => (int)GetValue(ValueProperty);
             set => SetValue(ValueProperty, value);
         }
 
@@ -62,7 +62,7 @@ namespace Earmark.UserControls
             NumberBox.KeyDown -= NumberBox_KeyDown;
         }
 
-        private SolidColorBrush GetForegroundBrush(decimal value)
+        private SolidColorBrush GetForegroundBrush(int value)
         {
             if (IsForegroundConditional)
             {

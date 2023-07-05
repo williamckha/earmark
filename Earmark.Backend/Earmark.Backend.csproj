@@ -6,9 +6,13 @@
     <RuntimeIdentifiers>win10-x86;win10-x64;win10-arm64</RuntimeIdentifiers>
     <UseWinUI>true</UseWinUI>
   </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\.editorconfig" Link=".editorconfig" />
+  </ItemGroup>
 
   <ItemGroup>
       <PackageReference Include="CsvHelper" Version="30.0.1" />
+      <PackageReference Include="EntityFramework.DbContextScope" Version="1.0.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.8" />
   </ItemGroup>
 </Project>

@@ -3,58 +3,64 @@ using CommunityToolkit.Mvvm.Messaging;
 using Earmark.Backend.Models;
 using Earmark.Backend.Services;
 using Earmark.Data.Messages;
+using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Earmark.ViewModels.Budget
 {
     public partial class BudgetMonthCategoryGroupViewModel : ObservableRecipient
     {
-        private IAccountDetailService _accountDetailService;
         private IBudgetService _budgetService;
 
         private BudgetMonth _budgetMonth;
-        private CategoryGroup _categoryGroup;
+
+        /// <summary>
+        /// The total amount of money budgeted for the category group.
+        /// </summary>
+        [ObservableProperty]
+        private int _totalBudgeted;
+
+        /// <summary>
+        /// The total sum of inflows and outflows for the category group.
+        /// </summary>
+        [ObservableProperty]
+        private int _totalActivity;
+
+        /// <summary>
+        /// The total amount of money available for the category group.
+        /// </summary>
+        [ObservableProperty]
+        private int _totalBalance;
+
+        /// <summary>
+        /// The unique ID that identifies the category group.
+        /// </summary>
+        public Guid CategoryGroupId { get; }
 
         /// <summary>
         /// The categories contained in the category group.
         /// </summary>
         public ObservableCollection<BudgetMonthCategoryViewModel> Categories { get; }
 
-        /// <summary>
-        /// The total amount of money budgeted for the category group.
-        /// </summary>
-        public decimal TotalBudgeted => _budgetService.GetTotalBudgetedForMonth(_budgetMonth, _categoryGroup);
-
-        /// <summary>
-        /// The total sum of inflows and outflows for the category group.
-        /// </summary>
-        public decimal TotalActivity => 
-            _accountDetailService.GetTotalActivityForMonth(_budgetMonth.Month, _budgetMonth.Year, _categoryGroup);
-
-        /// <summary>
-        /// The total amount of money available for the category group.
-        /// </summary>
-        public decimal TotalBalance => _budgetService.GetTotalBalanceForMonth(_budgetMonth, _categoryGroup);
-
         public BudgetMonthCategoryGroupViewModel(
-            IAccountDetailService accountDetailService,
             IBudgetService budgetService, 
             BudgetMonth budgetMonth, 
             CategoryGroup categoryGroup) : base(StrongReferenceMessenger.Default)
         {
-            _accountDetailService = accountDetailService;
             _budgetService = budgetService;
-
             _budgetMonth = budgetMonth;
-            _categoryGroup = categoryGroup;
+
+            CategoryGroupId = categoryGroup.Id;
 
             Categories = new ObservableCollection<BudgetMonthCategoryViewModel>();
 
-            foreach (var category in _categoryGroup.Categories)
+            foreach (var category in categoryGroup.Categories)
             {
-                Categories.Add(new BudgetMonthCategoryViewModel(
-                    _accountDetailService, _budgetService, _budgetMonth, category));
+                Categories.Add(new BudgetMonthCategoryViewModel(_budgetService, _budgetMonth, category));
             }
+
+            UpdateCalculatedAndActivityProperties();
 
             IsActive = true;
         }
@@ -63,22 +69,24 @@ namespace Earmark.ViewModels.Budget
         {
             base.OnActivated();
 
-            Messenger.Register<BudgetMonthCategoryGroupViewModel, BudgetedAmountChangedMessage>(this, (r, m) =>
+            Messenger.Register<BudgetMonthCategoryGroupViewModel, BudgetedAmountChangedMessage, Guid>(this, CategoryGroupId, (r, m) =>
             {
-                if (r._categoryGroup == m.BudgetedAmount.Category.Group)
-                {
-                    r.OnPropertyChanged(nameof(TotalBudgeted));
-                    r.OnPropertyChanged(nameof(TotalBalance));
-                }
+                r.UpdateCalculatedProperties();
             });
-            
-            Messenger.Register<BudgetMonthCategoryGroupViewModel, BudgetedAmountResetMessage>(this, (r, m) =>
+
+            Messenger.Register<BudgetMonthCategoryGroupViewModel, CategoryAddedMessage, Guid>(this, CategoryGroupId, (r, m) =>
             {
-                if (r._budgetMonth == m.Month)
-                {
-                    r.OnPropertyChanged(nameof(TotalBudgeted));
-                }
-                r.OnPropertyChanged(nameof(TotalBalance));
+                r.Categories.Add(new BudgetMonthCategoryViewModel(r._budgetService, r._budgetMonth, m.Category));
+            });
+
+            Messenger.Register<BudgetMonthCategoryGroupViewModel, CategoryRemovedMessage, Guid>(this, CategoryGroupId, (r, m) =>
+            {
+                var categoryViewModel = r.Categories.First(x => x.CategoryId == m.CategoryId);
+
+                categoryViewModel.IsActive = false;
+                r.Categories.Remove(categoryViewModel);
+
+                r.UpdateCalculatedAndActivityProperties();
             });
         }
 
@@ -90,6 +98,18 @@ namespace Earmark.ViewModels.Budget
             {
                 category.IsActive = false;
             }
+        }
+
+        private void UpdateCalculatedProperties()
+        {
+            TotalBudgeted = Categories.Sum(x => x.TotalBudgeted);
+            TotalBalance = Categories.Sum(x => x.TotalBalance);
+        }
+
+        private void UpdateCalculatedAndActivityProperties()
+        {
+            UpdateCalculatedProperties();
+            TotalActivity = Categories.Sum(x => x.TotalActivity);
         }
     }
 }

@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Earmark.Data.Suggestion
+namespace Earmark.Data.Suggestion.SuggestionProviders
 {
     public class SuggestionProvider<TModel, TSuggestion> : ISuggestionProvider where TSuggestion : ISuggestion
     {
         private const int MaxNumberOfSuggestions = 50;
+        private IEnumerable<TModel> _models;
 
         private Func<IEnumerable<TModel>> _modelsCallback;
         private Func<TModel, string> _modelNameGetter;
@@ -14,8 +15,8 @@ namespace Earmark.Data.Suggestion
         private Func<CreateSuggestion, ISuggestion> _createSuggestionCallback;
 
         public SuggestionProvider(
-            Func<IEnumerable<TModel>> modelsCallback, 
-            Func<TModel, string> modelNameGetter, 
+            Func<IEnumerable<TModel>> modelsCallback,
+            Func<TModel, string> modelNameGetter,
             Func<TModel, object, TSuggestion> suggestionCreator,
             Func<CreateSuggestion, ISuggestion> createSuggestionCallback = null)
         {
@@ -25,15 +26,15 @@ namespace Earmark.Data.Suggestion
             _createSuggestionCallback = createSuggestionCallback;
         }
 
-        public IEnumerable<ISuggestion> GetSuggestionsByQuery(string query)
+        public void PrepareForQuery()
         {
-            return GetSuggestionsByQuery(query, null);
+            _models = _modelsCallback();
         }
 
         public IEnumerable<ISuggestion> GetSuggestionsByQuery(string query, object predicateArg)
         {
             var splitQuery = query.ToLower().Split(' ');
-            var models = _modelsCallback()
+            var models = _models
                 .Take(MaxNumberOfSuggestions)
                 .OrderBy(x => _modelNameGetter(x))
                 .Where(x => splitQuery.All(y => _modelNameGetter(x).ToLower().Contains(y)));
@@ -44,7 +45,7 @@ namespace Earmark.Data.Suggestion
                 if (suggestion is not null)
                 {
                     yield return suggestion;
-                }    
+                }
             }
 
             if (_createSuggestionCallback is not null &&

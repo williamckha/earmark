@@ -91,7 +91,7 @@
                             <TextBlock Grid.Column="1"
                                        FontWeight="SemiBold"
                                        Foreground="{x:Bind conv:DecimalToBrushConverter.GetConditionalWithFadedZeroForegroundBrush(TotalBalance), Mode=OneWay}"
-                                       Text="{x:Bind conv:CurrencyFormatConverter.DecimalToString(TotalBalance), Mode=OneWay}" />
+                                       Text="{x:Bind conv:CurrencyFormatConverter.CurrencyIntegerToString(TotalBalance), Mode=OneWay}" />
                         </Grid>
                     </NavigationViewItem>
 
@@ -110,7 +110,7 @@
                             <TextBlock Grid.Column="1"
                                        FontWeight="SemiBold"
                                        Foreground="{x:Bind conv:DecimalToBrushConverter.GetConditionalWithFadedZeroForegroundBrush(TotalBalance), Mode=OneWay}"
-                                       Text="{x:Bind conv:CurrencyFormatConverter.DecimalToString(TotalBalance), Mode=OneWay}" />
+                                       Text="{x:Bind conv:CurrencyFormatConverter.CurrencyIntegerToString(TotalBalance), Mode=OneWay}" />
                         </Grid>
                     </NavigationViewItem>
                 </DataTemplate>

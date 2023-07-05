@@ -8,6 +8,7 @@ using Earmark.Backend.Services.TransactionImporter;
 using Earmark.Data.Messages;
 using Earmark.Data.Navigation;
 using Earmark.Data.Suggestion;
+using Earmark.Data.Suggestion.SuggestionProviders;
 using Earmark.Helpers;
 using System;
 using System.Collections.Generic;
@@ -20,25 +21,19 @@ namespace Earmark.ViewModels.Account
     public partial class AccountViewModel : ObservableRecipient
     {
         private IAccountService _accountService;
+        private IBudgetService _budgetService;
         private IPayeeService _payeeService;
         private ICategoriesService _categoriesService;
 
-        private string _accountGroupName;
-        private IEnumerable<Backend.Models.Account> _accounts;
+        [ObservableProperty]
+        private string _accountName;
 
-        public string AccountName
-        {
-            get => IsMultipleAccounts ? _accountGroupName : _accounts.FirstOrDefault()?.Name;
-            set
-            {
-                // Account renaming to be implemented.
-                throw new NotImplementedException();
-            }
-        }
+        [ObservableProperty]
+        private int _totalBalance;
 
-        public bool IsMultipleAccounts => _accounts.Count() > 1;
+        public IEnumerable<Guid> AccountIds { get; private set; }
 
-        public decimal TotalBalance => _accounts.SelectMany(x => x.Transactions).Sum(x => x.Amount);
+        public bool IsMultipleAccounts => AccountIds.Count() > 1;
 
         public SuggestionProvider<Backend.Models.Account, AccountSuggestion> AccountSuggestionProvider { get; }
 
@@ -52,10 +47,12 @@ namespace Earmark.ViewModels.Account
 
         public AccountViewModel(
             IAccountService accountService,
+            IBudgetService budgetService,
             IPayeeService payeeService,
             ICategoriesService categoriesService) : base(StrongReferenceMessenger.Default)
         {
             _accountService = accountService;
+            _budgetService = budgetService;
             _payeeService = payeeService;
             _categoriesService = categoriesService;
 
@@ -117,41 +114,22 @@ namespace Earmark.ViewModels.Account
 
             Messenger.Register<AccountViewModel, AccountBalanceChangedMessage>(this, (r, m) =>
             {
-                r.OnPropertyChanged(nameof(TotalBalance));
-            });
-
-            Messenger.Register<AccountViewModel, TransactionViewModelRequestMessage>(this, (r, m) =>
-            {
-                if (m.Transaction is not null)
-                {
-                    m.Reply(r.Transactions.FirstOrDefault(x => x.Id == m.Transaction.Id));
-                }
-                else
-                {
-                    m.Reply(null);
-                }
-                
+                r.TotalBalance = r._accountService.GetTotalBalanceForAccounts(r.AccountIds);
             });
 
             Messenger.Register<AccountViewModel, TransferTransactionChangedMessage>(this, (r, m) =>
             {
                 if (m.OldTransferTransaction is not null)
                 {
-                    var oldTransferTransaction = r.Transactions.FirstOrDefault(x => x.Id == m.OldTransferTransaction.Id);
-                    if (oldTransferTransaction is not null)
-                    {
-                        r.Transactions.Remove(oldTransferTransaction);
-                        oldTransferTransaction.IsActive = false;
-                    }
+                    m.OldTransferTransaction.IsActive = false;
+                    r.Transactions.Remove(m.OldTransferTransaction);
                 }
 
                 if (m.NewTransferTransaction is not null &&
-                    r._accounts.Contains(m.NewTransferTransaction.Account))
+                    r.AccountIds.Contains(m.NewTransferTransaction.Account.Id))
                 {
                     r.AddTransactionViewModel(m.NewTransferTransaction);
                 }
-
-                r.Messenger.Send(new AccountBalanceChangedMessage());
             });
         }
 
@@ -167,44 +145,50 @@ namespace Earmark.ViewModels.Account
 
         public void LoadAccounts(AccountGroup accountGroup)
         {
-            _accountGroupName = accountGroup.Name;
-            _accounts = _accountService
-                .GetAccounts()
-                .IntersectBy(accountGroup.AccountIds, x => x.Id)
-                .ToList();
+            AccountIds = accountGroup.AccountIds.ToList();
+            AccountName = accountGroup.Name;
 
-            foreach (var transaction in _accounts.SelectMany(x => x.Transactions))
+            var transactions = _accountService.GetTransactions(AccountIds);
+            foreach (var transaction in transactions)
             {
                 AddTransactionViewModel(transaction);
             }
-        }
-
-        [RelayCommand]
-        public void AddTransaction()
-        {
-            if (!_accounts.Any()) return;
-
-            var transaction = _accountService.AddTransaction(_accounts.First(), DateTimeOffset.Now, decimal.Zero);
-            AddTransactionViewModel(transaction);
 
             Messenger.Send(new AccountBalanceChangedMessage());
         }
 
         [RelayCommand]
+        public void AddTransaction()
+        {
+            if (AccountIds.Any())
+            {
+                var transaction = _accountService.AddTransaction(AccountIds.First(), DateTime.Now, 0);
+                AddTransactionViewModel(transaction);
+
+                Messenger.Send(new AccountBalanceChangedMessage());
+            }
+        }
+
+        [RelayCommand]
         public void RemoveTransaction(TransactionViewModel transactionViewModel)
         {
-            Transactions.Remove(transactionViewModel);
-            transactionViewModel.IsActive = false;
-
-            var transferTransaction = transactionViewModel.TransferTransaction;
-            if (transferTransaction is not null)
+            _accountService.RemoveTransaction(transactionViewModel.Id);
+            if (transactionViewModel.TransferTransactionId is Guid transferTransactionId)
             {
-                Transactions.Remove(transferTransaction);
-                transferTransaction.IsActive = false;
+                _accountService.RemoveTransaction(transferTransactionId);
             }
 
-            var transaction = _accounts.SelectMany(x => x.Transactions).First(x => x.Id == transactionViewModel.Id);
-            _accountService.RemoveTransaction(transaction);
+            _budgetService.UpdateTotalUnbudgetedAmounts(transactionViewModel.Date.Month, transactionViewModel.Date.Year);
+
+            var transferTransaction = transactionViewModel.GetTransferTransactionViewModel();
+            if (transferTransaction is not null)
+            {
+                transferTransaction.IsActive = false;
+                Transactions.Remove(transferTransaction);
+            }
+
+            transactionViewModel.IsActive = false;
+            Transactions.Remove(transactionViewModel);
 
             Messenger.Send(new AccountBalanceChangedMessage());
         }
@@ -226,12 +210,12 @@ namespace Earmark.ViewModels.Account
             Messenger.Send(new AccountBalanceChangedMessage());
         }
 
-        private TransactionViewModel AddTransactionViewModel(Transaction transaction)
+        private void AddTransactionViewModel(Transaction transaction)
         {
-            var transactionViewModel = new TransactionViewModel(_accountService, _payeeService, _categoriesService, transaction);
-            Transactions.Add(transactionViewModel);
+            var transactionViewModel = new TransactionViewModel(
+                _accountService, _budgetService, _payeeService, _categoriesService, transaction);
 
-            return transactionViewModel;
+            Transactions.Add(transactionViewModel);
         }
     }
 }

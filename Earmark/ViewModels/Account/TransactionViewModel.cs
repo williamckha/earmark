@@ -12,126 +12,182 @@ namespace Earmark.ViewModels.Account
     public partial class TransactionViewModel : ObservableRecipient
     {
         private IAccountService _accountService;
+        private IBudgetService _budgetService;
         private IPayeeService _payeeService;
         private ICategoriesService _categoriesService;
 
-        private Transaction _transaction;
+        [ObservableProperty]
+        private DateTime _date;
 
-        public Guid Id => _transaction.Id;
+        [ObservableProperty]
+        private string _memo;
 
-        public bool IsTransfer => _transaction.TransferTransaction is not null;
+        [ObservableProperty]
+        private int _amount;
 
-        public TransactionViewModel TransferTransaction => 
-            Messenger.Send(new TransactionViewModelRequestMessage(_transaction.TransferTransaction));
+        [ObservableProperty]
+        private AccountSuggestion _chosenAccountSuggestion;
 
-        public DateTimeOffset Date
-        {
-            get => _transaction.Date;
-            set
-            {
-                if (_transaction.Date != value)
-                {
-                    _accountService.SetDateForTransaction(_transaction, value);
-                    TransferTransaction?.OnPropertyChanged(nameof(Date));
-                }
-            }
-        }
+        [ObservableProperty]
+        private PayeeSuggestion _chosenPayeeSuggestion;
+        
+        [ObservableProperty]
+        private CategorySuggestion _chosenCategorySuggestion;
 
-        public string Memo
-        {
-            get => _transaction.Memo;
-            set
-            {
-                if (_transaction.Memo != value)
-                {
-                    _accountService.SetMemoForTransaction(_transaction, value);
-                    TransferTransaction?.OnPropertyChanged(nameof(Memo));
-                }
-            }
-        }
+        public Guid Id { get; }
 
-        public decimal Amount
-        {
-            get => _transaction.Amount;
-            set
-            {
-                if (_transaction.Amount != value)
-                {
-                    _accountService.SetAmountForTransaction(_transaction, value);
-                    TransferTransaction?.OnPropertyChanged(nameof(Amount));
-                    Messenger.Send(new AccountBalanceChangedMessage());
-                }
-            }
-        }
+        public Guid? TransferTransactionId { get; private set; }
 
-        public AccountSuggestion ChosenAccountSuggestion
-        {
-            get => new AccountSuggestion(_transaction.Account);
-            set
-            {
-                if (_transaction.Account.Id != value.Id)
-                {
-                    var account = _accountService.GetAccounts().First(x => x.Id == value.Id);
-                    _accountService.SetAccountForTransaction(_transaction, account);
-
-                    TransferTransaction?.OnPropertyChanged(nameof(ChosenPayeeSuggestion));
-                    Messenger.Send(new AccountBalanceChangedMessage());
-                }
-            }
-        }
-
-        public PayeeSuggestion ChosenPayeeSuggestion
-        {
-            get => new PayeeSuggestion(_transaction.Payee);
-            set
-            {
-                if (_transaction.Payee?.Id != value.Id)
-                {
-                    var oldTransferTransaction = _transaction.TransferTransaction;
-
-                    var payee = _payeeService.GetPayees().FirstOrDefault(x => x.Id == value.Id);
-                    _accountService.SetPayeeForTransaction(_transaction, payee);
-
-                    if (_transaction.TransferTransaction is not null)
-                    {
-                        OnPropertyChanged(nameof(ChosenCategorySuggestion));
-                    }
-
-                    if (_transaction.TransferTransaction?.Id != oldTransferTransaction?.Id)
-                    {
-                        OnPropertyChanged(nameof(IsTransfer));
-                    }
-
-                    Messenger.Send(new TransferTransactionChangedMessage(
-                        oldTransferTransaction, _transaction.TransferTransaction));
-                }
-            }
-        }
-
-        public CategorySuggestion ChosenCategorySuggestion
-        {
-            get => new CategorySuggestion(_transaction.Category);
-            set
-            {
-                if (_transaction.TransferTransaction is null && _transaction.Category?.Id != value.Id)
-                {
-                    var category = _categoriesService.GetCategories().FirstOrDefault(x => x.Id == value.Id);
-                    _accountService.SetCategoryForTransaction(_transaction, category);
-                }
-            }
-        }
+        public bool IsTransfer => TransferTransactionId is not null;
 
         public TransactionViewModel(
             IAccountService accountService,
+            IBudgetService budgetService,
             IPayeeService payeeService,
             ICategoriesService categoriesService,
             Transaction transaction) : base(StrongReferenceMessenger.Default)
         {
             _accountService = accountService;
+            _budgetService = budgetService;
             _payeeService = payeeService;
             _categoriesService = categoriesService;
 
-            _transaction = transaction;
+            Id = transaction.Id;
+            TransferTransactionId = transaction.TransferTransaction?.Id;
+
+            _date = transaction.Date;
+            _memo = transaction.Memo;
+            _amount = transaction.Amount;
+
+            _chosenAccountSuggestion = new AccountSuggestion(transaction.Account);
+            _chosenPayeeSuggestion = new PayeeSuggestion(transaction.Payee);
+            _chosenCategorySuggestion = new CategorySuggestion(transaction.Category);
+
+            IsActive = true;
+        }
+
+        protected override void OnActivated()
+        {
+            base.OnActivated();
+
+            Messenger.Register<TransactionViewModel, TransactionViewModelRequestMessage, Guid>(this, Id, (r, m) => m.Reply(r));
+        }
+
+        partial void OnDateChanged(DateTime oldValue, DateTime newValue)
+        {
+            if (oldValue != newValue)
+            {
+                _accountService.SetDateForTransaction(Id, newValue);
+                _budgetService.UpdateTotalUnbudgetedAmounts(Date.Month, Date.Year);
+
+                var transferTransactionViewModel = GetTransferTransactionViewModel();
+                if (transferTransactionViewModel is not null)
+                {
+                    transferTransactionViewModel._date = newValue;
+                    transferTransactionViewModel.OnPropertyChanged(nameof(Date));
+                }
+            }
+        }
+
+        partial void OnMemoChanged(string oldValue, string newValue)
+        {
+            if (oldValue != newValue)
+            {
+                _accountService.SetMemoForTransaction(Id, newValue);
+
+                var transferTransactionViewModel = GetTransferTransactionViewModel();
+                if (transferTransactionViewModel is not null)
+                {
+                    transferTransactionViewModel._memo = newValue;
+                    transferTransactionViewModel.OnPropertyChanged(nameof(Memo));
+                }
+            }
+        }
+
+        partial void OnAmountChanged(int oldValue, int newValue)
+        {
+            if (oldValue != newValue)
+            {
+                _accountService.SetAmountForTransaction(Id, newValue);
+                _budgetService.UpdateTotalUnbudgetedAmounts(Date.Month, Date.Year);
+
+                var transferTransactionViewModel = GetTransferTransactionViewModel();
+                if (transferTransactionViewModel is not null)
+                {
+                    transferTransactionViewModel._amount = -newValue;
+                    transferTransactionViewModel.OnPropertyChanged(nameof(Amount));
+                }
+
+                Messenger.Send(new AccountBalanceChangedMessage());
+            }
+        }
+
+        partial void OnChosenAccountSuggestionChanged(AccountSuggestion oldValue, AccountSuggestion newValue)
+        {
+            if (oldValue.Id != newValue.Id)
+            {
+                _accountService.SetAccountForTransaction(Id, (Guid)newValue.Id);
+
+                var transferTransactionViewModel = GetTransferTransactionViewModel();
+                if (transferTransactionViewModel is not null)
+                {
+                    var transferPayee = _payeeService.GetPayees().First(x => x.TransferAccount.Id == newValue.Id);
+                    transferTransactionViewModel._chosenPayeeSuggestion = new PayeeSuggestion(transferPayee);
+                    transferTransactionViewModel.OnPropertyChanged(nameof(ChosenPayeeSuggestion));
+                }
+
+                Messenger.Send(new AccountBalanceChangedMessage());
+            }
+        }
+
+        partial void OnChosenPayeeSuggestionChanged(PayeeSuggestion oldValue, PayeeSuggestion newValue)
+        {
+            if (oldValue.Id != newValue.Id)
+            {
+                var transaction = _accountService.SetPayeeForTransaction(Id, newValue.Id);
+
+                Messenger.Send(new TransferTransactionChangedMessage(
+                    GetTransferTransactionViewModel(), transaction.TransferTransaction));
+
+                // Check if changing the payee turned this transaction into a transfer.
+                if (transaction.TransferTransaction is not null)
+                {
+                    // Transfer transactions are uncategorized, so the view model should be updated to reflect this.
+                    _chosenCategorySuggestion = new CategorySuggestion(null);
+                    OnPropertyChanged(nameof(ChosenCategorySuggestion));
+
+                    // Uncategorizing an existing categorized transaction may affect activity, so we need
+                    // to update the total unbudgeted amounts in the budget.
+                    _budgetService.UpdateTotalUnbudgetedAmounts(Date.Month, Date.Year);
+                }
+
+                if (TransferTransactionId != transaction.TransferTransaction?.Id)
+                {
+                    TransferTransactionId = transaction.TransferTransaction?.Id;
+                    OnPropertyChanged(nameof(IsTransfer));
+                }
+
+                Messenger.Send(new AccountBalanceChangedMessage());
+            }
+        }
+
+        partial void OnChosenCategorySuggestionChanged(CategorySuggestion oldValue, CategorySuggestion newValue)
+        {
+            if (oldValue.Id != newValue.Id)
+            {
+                _accountService.SetCategoryForTransaction(Id, newValue.Id);
+                _budgetService.UpdateTotalUnbudgetedAmounts(Date.Month, Date.Year);
+            }
+        }
+
+        public TransactionViewModel GetTransferTransactionViewModel()
+        {
+            if (TransferTransactionId is Guid transferTransactionId)
+            {
+                return Messenger.Send(new TransactionViewModelRequestMessage(), transferTransactionId);
+            }
+
+            return null;
         }
     }
 }

@@ -37,17 +37,17 @@ namespace Earmark.Converters
         }
 
         /// <summary>
-        /// Returns visible if the decimal is zero.
+        /// Returns visible if the integer is zero.
         /// </summary>
-        public static Visibility IfZero(this decimal value)
+        public static Visibility IfZero(this int value)
         {
             return value == 0 ? Visibility.Visible : Visibility.Collapsed;
         }
 
         /// <summary>
-        /// Returns visible if the decimal is not zero.
+        /// Returns visible if the integer is not zero.
         /// </summary>
-        public static Visibility IfNotZero(this decimal value)
+        public static Visibility IfNotZero(this int value)
         {
             return value == 0 ? Visibility.Collapsed : Visibility.Visible;
         }

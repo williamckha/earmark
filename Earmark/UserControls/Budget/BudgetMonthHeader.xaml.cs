@@ -15,7 +15,7 @@ namespace Earmark.UserControls.Budget
             this.InitializeComponent();
         }
 
-        private string GetUnbudgetedLastMonthLabel(decimal unbudgetedLastMonth)
+        private string GetUnbudgetedLastMonthLabel(int unbudgetedLastMonth)
         {
             (int lastMonth, _) = DateTimeHelper.GetPreviousMonth(ViewModel.Month, ViewModel.Year);
             if (unbudgetedLastMonth < 0)
@@ -54,7 +54,7 @@ namespace Earmark.UserControls.Budget
                 DateTimeConverter.MonthNumberToAbbreviation(ViewModel.Month, false));
         }
 
-        private string GetTotalUnbudgetedLabel(decimal totalUnbudgeted)
+        private string GetTotalUnbudgetedLabel(int totalUnbudgeted)
         {
             return (totalUnbudgeted < 0) ? 
                 "OverbudgetedThisMonthLabel".GetLocalizedResource() :

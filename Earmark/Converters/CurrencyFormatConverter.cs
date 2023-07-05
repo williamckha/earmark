@@ -17,14 +17,16 @@ namespace Earmark.Converters
             }
         };
 
-        public static string DecimalToString(decimal amount)
+        public static string CurrencyIntegerToString(int currencyInteger)
         {
-            return Formatter.Format(decimal.ToDouble(amount));
+            double currencyDouble = CurrencyIntegerToDoubleConverterHelper.Convert(currencyInteger);
+            return Formatter.Format(currencyDouble);
         }
 
-        public static string NegatedDecimalToString(decimal amount)
+        public static string NegatedCurrencyIntegerToString(int currencyInteger)
         {
-            return Formatter.Format(decimal.ToDouble(-amount));
+            double currencyDouble = CurrencyIntegerToDoubleConverterHelper.Convert(currencyInteger);
+            return Formatter.Format(-currencyDouble);
         }
     }
 }

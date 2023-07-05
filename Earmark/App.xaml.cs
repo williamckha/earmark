@@ -1,9 +1,13 @@
-﻿using Earmark.Backend.Services;
+﻿using Earmark.Backend.Database;
+using Earmark.Backend.Services;
 using Earmark.Services;
 using Earmark.ViewModels;
 using Earmark.ViewModels.Account;
 using Earmark.ViewModels.Budget;
 using Earmark.Views;
+using EntityFramework.DbContextScope;
+using EntityFramework.DbContextScope.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using System;
@@ -38,6 +42,12 @@ namespace Earmark
             this.InitializeComponent();
 
             Services = ConfigureServices();
+
+            var dbContextScopeFactory = Services.GetService<IDbContextScopeFactory>();
+            using (var dbContextScope = dbContextScopeFactory.Create())
+            {
+                dbContextScope.DbContexts.Get<AppDbContext>().Database.Migrate();
+            }
         }
 
         /// <summary>
@@ -71,15 +81,12 @@ namespace Earmark
 
                 .AddSingleton<INavigationService, NavigationService>()
 
-                .AddSingleton<AccountStore>()
-                .AddSingleton<IAccountStore>(x => x.GetService<AccountStore>())
-                .AddSingleton<IAccountDetailService>(x => x.GetService<AccountStore>())
+                .AddSingleton<IDbContextScopeFactory, DbContextScopeFactory>()
+
                 .AddSingleton<IAccountService, AccountService>()
                 .AddSingleton<IBudgetService, BudgetService>()
                 .AddSingleton<ICategoriesService, CategoriesService>()
                 .AddSingleton<IPayeeService, PayeeService>()
-
-                
 
                 .BuildServiceProvider();
         }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 
 namespace Earmark.Backend.Models
 {
@@ -13,9 +12,6 @@ namespace Earmark.Backend.Models
         public string Name { get; set; }
 
         public bool IsIncome { get; set; }
-
-        [Required]
-        public Budget Budget { get; set; }
 
         public List<Category> Categories { get; set; }
     }

@@ -1,4 +1,7 @@
-﻿using Earmark.Backend.Models;
+﻿using Earmark.Backend.Database;
+using Earmark.Backend.Models;
+using EntityFramework.DbContextScope.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,50 +10,60 @@ namespace Earmark.Backend.Services
 {
     public class PayeeService : IPayeeService
     {
-        private List<Payee> _payees;
+        private IDbContextScopeFactory _dbContextScopeFactory;
 
-        public PayeeService()
+        public PayeeService(IDbContextScopeFactory dbContextScopeFactory)
         {
-            _payees = new List<Payee>();
+            _dbContextScopeFactory = dbContextScopeFactory;
         }
 
         public IEnumerable<Payee> GetPayees()
         {
-            return _payees;
+            using (var dbContextScope = _dbContextScopeFactory.CreateReadOnly())
+            {
+                return dbContextScope.DbContexts.Get<AppDbContext>().Payees
+                    .Include(x => x.TransferAccount)
+                    .AsNoTracking()
+                    .ToList();
+            }
         }
 
         public Payee AddPayee(string name)
         {
-            if (_payees.Any(x => x.Name == name))
-                throw new ArgumentException("Payee with the same name already exists.");
-
-            var payee = new Payee()
+            using (var dbContextScope = _dbContextScopeFactory.Create())
             {
-                Id = Guid.NewGuid(),
-                Name = name,
-                Transactions = new List<Transaction>(),
-                TransferAccount = null
-            };
+                var dbContext = dbContextScope.DbContexts.Get<AppDbContext>();
 
-            _payees.Add(payee);
+                if (dbContext.Payees.Any(x => x.Name == name))
+                    throw new ArgumentException("Payee with the same name already exists.");
 
-            return payee;
+                var payee = new Payee()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = name
+                };
+
+                dbContext.Payees.Add(payee);
+                dbContextScope.SaveChanges();
+                return payee;
+            }
         }
 
-        public void RemovePayee(Payee payee)
+        public void RemovePayee(Guid payeeId)
         {
-            if (payee is null) throw new ArgumentNullException(nameof(payee));
-            if (payee.TransferAccount is not null)
-                throw new ArgumentException("Transfer payees cannot be removed.");
-
-            while (payee.Transactions.Any())
+            using (var dbContextScope = _dbContextScopeFactory.Create())
             {
-                var transaction = payee.Transactions.First();
-                payee.Transactions.Remove(transaction);
-                transaction.Payee = null;
-            }
+                var dbContext = dbContextScope.DbContexts.Get<AppDbContext>();
 
-            _payees.Remove(payee);
+                var payee = dbContext.Payees.FirstOrDefault(x => x.Id == payeeId);
+                dbContext.Entry(payee).Reference(x => x.TransferAccount).Load();
+
+                if (payee.TransferAccount is not null)
+                    throw new ArgumentException("Transfer payees cannot be removed.");
+
+                dbContext.Payees.Remove(payee);
+                dbContextScope.SaveChanges();
+            }
         }
     }
 }

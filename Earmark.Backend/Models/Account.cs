@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 
 namespace Earmark.Backend.Models
 {
@@ -9,6 +8,8 @@ namespace Earmark.Backend.Models
         public Guid Id { get; set; }
 
         public string Name { get; set; }
+
+        public int TotalBalance { get; set; }
 
         public List<Transaction> Transactions { get; set; }
 

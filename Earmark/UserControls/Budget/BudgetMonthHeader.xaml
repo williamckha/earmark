@@ -115,25 +115,25 @@
                        Grid.Column="0"
                        TextTrimming="CharacterEllipsis"
                        Style="{ThemeResource MonthSummaryValueTextBlockStyle}"
-                       Text="{x:Bind conv:CurrencyFormatConverter.DecimalToString(ViewModel.UnbudgetedLastMonth), Mode=OneWay}" />
+                       Text="{x:Bind conv:CurrencyFormatConverter.CurrencyIntegerToString(ViewModel.UnbudgetedLastMonth), Mode=OneWay}" />
 
             <TextBlock Grid.Row="1"
                        Grid.Column="0"
                        TextTrimming="CharacterEllipsis"
                        Style="{ThemeResource MonthSummaryValueTextBlockStyle}"
-                       Text="{x:Bind conv:CurrencyFormatConverter.NegatedDecimalToString(ViewModel.OverspentLastMonth), Mode=OneWay}" />
+                       Text="{x:Bind conv:CurrencyFormatConverter.NegatedCurrencyIntegerToString(ViewModel.OverspentLastMonth), Mode=OneWay}" />
 
             <TextBlock Grid.Row="2"
                        Grid.Column="0"
                        TextTrimming="CharacterEllipsis"
                        Style="{ThemeResource MonthSummaryValueTextBlockStyle}"
-                       Text="{x:Bind conv:CurrencyFormatConverter.DecimalToString(ViewModel.TotalIncome), Mode=OneWay}" />
+                       Text="{x:Bind conv:CurrencyFormatConverter.CurrencyIntegerToString(ViewModel.TotalIncome), Mode=OneWay}" />
 
             <TextBlock Grid.Row="3"
                        Grid.Column="0"
                        TextTrimming="CharacterEllipsis"
                        Style="{ThemeResource MonthSummaryValueTextBlockStyle}"
-                       Text="{x:Bind conv:CurrencyFormatConverter.NegatedDecimalToString(ViewModel.TotalBudgeted), Mode=OneWay}" />
+                       Text="{x:Bind conv:CurrencyFormatConverter.NegatedCurrencyIntegerToString(ViewModel.TotalBudgeted), Mode=OneWay}" />
 
             <TextBlock Grid.Row="0"
                        Grid.Column="2"
@@ -165,7 +165,7 @@
             <TextBlock TextAlignment="Center"
                        Style="{ThemeResource TitleTextBlockStyle}"
                        Foreground="{x:Bind conv:DecimalToBrushConverter.GetConditionalForegroundBrush(ViewModel.TotalUnbudgeted), Mode=OneWay}"
-                       Text="{x:Bind conv:CurrencyFormatConverter.DecimalToString(ViewModel.TotalUnbudgeted), Mode=OneWay}" />
+                       Text="{x:Bind conv:CurrencyFormatConverter.CurrencyIntegerToString(ViewModel.TotalUnbudgeted), Mode=OneWay}" />
 
             <TextBlock TextAlignment="Center"
                        Style="{ThemeResource CaptionTextBlockStyle}"
@@ -236,17 +236,17 @@
             <TextBlock Grid.Row="1"
                        Grid.Column="0"
                        Style="{ThemeResource TotalTextBlockStyle}"
-                       Text="{x:Bind conv:CurrencyFormatConverter.DecimalToString(ViewModel.TotalBudgeted), Mode=OneWay}" />
+                       Text="{x:Bind conv:CurrencyFormatConverter.CurrencyIntegerToString(ViewModel.TotalBudgeted), Mode=OneWay}" />
 
             <TextBlock Grid.Row="1"
                        Grid.Column="1"
                        Style="{ThemeResource TotalTextBlockStyle}"
-                       Text="{x:Bind conv:CurrencyFormatConverter.DecimalToString(ViewModel.TotalActivity), Mode=OneWay}" />
+                       Text="{x:Bind conv:CurrencyFormatConverter.CurrencyIntegerToString(ViewModel.TotalActivity), Mode=OneWay}" />
 
             <TextBlock Grid.Row="1"
                        Grid.Column="2"
                        Style="{ThemeResource TotalTextBlockStyle}"
-                       Text="{x:Bind conv:CurrencyFormatConverter.DecimalToString(ViewModel.TotalBalance), Mode=OneWay}"
+                       Text="{x:Bind conv:CurrencyFormatConverter.CurrencyIntegerToString(ViewModel.TotalBalance), Mode=OneWay}"
                        Foreground="{x:Bind conv:DecimalToBrushConverter.GetRedWhenNegativeForegroundBrush(ViewModel.TotalBalance), Mode=OneWay}" />
 
         </Grid>

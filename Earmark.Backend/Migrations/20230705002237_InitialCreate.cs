@@ -12,14 +12,31 @@ namespace Earmark.Backend.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Budgets",
+                name: "BudgetMonths",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false)
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Month = table.Column<int>(type: "INTEGER", nullable: false),
+                    Year = table.Column<int>(type: "INTEGER", nullable: false),
+                    TotalUnbudgeted = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Budgets", x => x.Id);
+                    table.PrimaryKey("PK_BudgetMonths", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CategoryGroups",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Position = table.Column<int>(type: "INTEGER", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: true),
+                    IsIncome = table.Column<bool>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CategoryGroups", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -35,43 +52,22 @@ namespace Earmark.Backend.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "BudgetMonth",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Month = table.Column<int>(type: "INTEGER", nullable: false),
-                    Year = table.Column<int>(type: "INTEGER", nullable: false),
-                    TotalUnbudgeted = table.Column<decimal>(type: "TEXT", nullable: false),
-                    BudgetId = table.Column<Guid>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_BudgetMonth", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_BudgetMonth_Budgets_BudgetId",
-                        column: x => x.BudgetId,
-                        principalTable: "Budgets",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "CategoryGroup",
+                name: "Categories",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     Position = table.Column<int>(type: "INTEGER", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: true),
                     IsIncome = table.Column<bool>(type: "INTEGER", nullable: false),
-                    BudgetId = table.Column<Guid>(type: "TEXT", nullable: false)
+                    GroupId = table.Column<Guid>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CategoryGroup", x => x.Id);
+                    table.PrimaryKey("PK_Categories", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_CategoryGroup_Budgets_BudgetId",
-                        column: x => x.BudgetId,
-                        principalTable: "Budgets",
+                        name: "FK_Categories_CategoryGroups_GroupId",
+                        column: x => x.GroupId,
+                        principalTable: "CategoryGroups",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -81,7 +77,8 @@ namespace Earmark.Backend.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: true)
+                    Name = table.Column<string>(type: "TEXT", nullable: true),
+                    TotalBalance = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -95,112 +92,91 @@ namespace Earmark.Backend.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Category",
+                name: "BalanceAmounts",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Position = table.Column<int>(type: "INTEGER", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: true),
-                    IsIncome = table.Column<bool>(type: "INTEGER", nullable: false),
-                    GroupId = table.Column<Guid>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Category", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Category_CategoryGroup_GroupId",
-                        column: x => x.GroupId,
-                        principalTable: "CategoryGroup",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "BalanceAmount",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Amount = table.Column<decimal>(type: "TEXT", nullable: false),
+                    Amount = table.Column<int>(type: "INTEGER", nullable: false),
                     MonthId = table.Column<Guid>(type: "TEXT", nullable: false),
                     CategoryId = table.Column<Guid>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BalanceAmount", x => x.Id);
+                    table.PrimaryKey("PK_BalanceAmounts", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_BalanceAmount_BudgetMonth_MonthId",
+                        name: "FK_BalanceAmounts_BudgetMonths_MonthId",
                         column: x => x.MonthId,
-                        principalTable: "BudgetMonth",
+                        principalTable: "BudgetMonths",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_BalanceAmount_Category_CategoryId",
+                        name: "FK_BalanceAmounts_Categories_CategoryId",
                         column: x => x.CategoryId,
-                        principalTable: "Category",
+                        principalTable: "Categories",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "BudgetedAmount",
+                name: "BudgetedAmounts",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Amount = table.Column<decimal>(type: "TEXT", nullable: false),
+                    Amount = table.Column<int>(type: "INTEGER", nullable: false),
                     MonthId = table.Column<Guid>(type: "TEXT", nullable: false),
                     CategoryId = table.Column<Guid>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BudgetedAmount", x => x.Id);
+                    table.PrimaryKey("PK_BudgetedAmounts", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_BudgetedAmount_BudgetMonth_MonthId",
+                        name: "FK_BudgetedAmounts_BudgetMonths_MonthId",
                         column: x => x.MonthId,
-                        principalTable: "BudgetMonth",
+                        principalTable: "BudgetMonths",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_BudgetedAmount_Category_CategoryId",
+                        name: "FK_BudgetedAmounts_Categories_CategoryId",
                         column: x => x.CategoryId,
-                        principalTable: "Category",
+                        principalTable: "Categories",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "RolloverAmount",
+                name: "RolloverAmounts",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Amount = table.Column<decimal>(type: "TEXT", nullable: false),
+                    Amount = table.Column<int>(type: "INTEGER", nullable: false),
                     MonthId = table.Column<Guid>(type: "TEXT", nullable: false),
                     CategoryId = table.Column<Guid>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RolloverAmount", x => x.Id);
+                    table.PrimaryKey("PK_RolloverAmounts", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_RolloverAmount_BudgetMonth_MonthId",
+                        name: "FK_RolloverAmounts_BudgetMonths_MonthId",
                         column: x => x.MonthId,
-                        principalTable: "BudgetMonth",
+                        principalTable: "BudgetMonths",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_RolloverAmount_Category_CategoryId",
+                        name: "FK_RolloverAmounts_Categories_CategoryId",
                         column: x => x.CategoryId,
-                        principalTable: "Category",
+                        principalTable: "Categories",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Transaction",
+                name: "Transactions",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Date = table.Column<DateTimeOffset>(type: "TEXT", nullable: false),
+                    Date = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Memo = table.Column<string>(type: "TEXT", nullable: true),
-                    Amount = table.Column<decimal>(type: "TEXT", nullable: false),
+                    Amount = table.Column<int>(type: "INTEGER", nullable: false),
                     AccountId = table.Column<Guid>(type: "TEXT", nullable: false),
                     PayeeId = table.Column<Guid>(type: "TEXT", nullable: true),
                     CategoryId = table.Column<Guid>(type: "TEXT", nullable: true),
@@ -208,128 +184,116 @@ namespace Earmark.Backend.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Transaction", x => x.Id);
+                    table.PrimaryKey("PK_Transactions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Transaction_Accounts_AccountId",
+                        name: "FK_Transactions_Accounts_AccountId",
                         column: x => x.AccountId,
                         principalTable: "Accounts",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Transaction_Category_CategoryId",
+                        name: "FK_Transactions_Categories_CategoryId",
                         column: x => x.CategoryId,
-                        principalTable: "Category",
+                        principalTable: "Categories",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Transaction_Payees_PayeeId",
+                        name: "FK_Transactions_Payees_PayeeId",
                         column: x => x.PayeeId,
                         principalTable: "Payees",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Transaction_Transaction_TransferTransactionId",
+                        name: "FK_Transactions_Transactions_TransferTransactionId",
                         column: x => x.TransferTransactionId,
-                        principalTable: "Transaction",
+                        principalTable: "Transactions",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_BalanceAmount_CategoryId",
-                table: "BalanceAmount",
+                name: "IX_BalanceAmounts_CategoryId",
+                table: "BalanceAmounts",
                 column: "CategoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_BalanceAmount_MonthId",
-                table: "BalanceAmount",
+                name: "IX_BalanceAmounts_MonthId",
+                table: "BalanceAmounts",
                 column: "MonthId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_BudgetedAmount_CategoryId",
-                table: "BudgetedAmount",
+                name: "IX_BudgetedAmounts_CategoryId",
+                table: "BudgetedAmounts",
                 column: "CategoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_BudgetedAmount_MonthId",
-                table: "BudgetedAmount",
+                name: "IX_BudgetedAmounts_MonthId",
+                table: "BudgetedAmounts",
                 column: "MonthId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_BudgetMonth_BudgetId",
-                table: "BudgetMonth",
-                column: "BudgetId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Category_GroupId",
-                table: "Category",
+                name: "IX_Categories_GroupId",
+                table: "Categories",
                 column: "GroupId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CategoryGroup_BudgetId",
-                table: "CategoryGroup",
-                column: "BudgetId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RolloverAmount_CategoryId",
-                table: "RolloverAmount",
+                name: "IX_RolloverAmounts_CategoryId",
+                table: "RolloverAmounts",
                 column: "CategoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RolloverAmount_MonthId",
-                table: "RolloverAmount",
+                name: "IX_RolloverAmounts_MonthId",
+                table: "RolloverAmounts",
                 column: "MonthId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Transaction_AccountId",
-                table: "Transaction",
+                name: "IX_Transactions_AccountId",
+                table: "Transactions",
                 column: "AccountId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Transaction_CategoryId",
-                table: "Transaction",
+                name: "IX_Transactions_CategoryId",
+                table: "Transactions",
                 column: "CategoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Transaction_PayeeId",
-                table: "Transaction",
+                name: "IX_Transactions_PayeeId",
+                table: "Transactions",
                 column: "PayeeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Transaction_TransferTransactionId",
-                table: "Transaction",
-                column: "TransferTransactionId");
+                name: "IX_Transactions_TransferTransactionId",
+                table: "Transactions",
+                column: "TransferTransactionId",
+                unique: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "BalanceAmount");
+                name: "BalanceAmounts");
 
             migrationBuilder.DropTable(
-                name: "BudgetedAmount");
+                name: "BudgetedAmounts");
 
             migrationBuilder.DropTable(
-                name: "RolloverAmount");
+                name: "RolloverAmounts");
 
             migrationBuilder.DropTable(
-                name: "Transaction");
+                name: "Transactions");
 
             migrationBuilder.DropTable(
-                name: "BudgetMonth");
+                name: "BudgetMonths");
 
             migrationBuilder.DropTable(
                 name: "Accounts");
 
             migrationBuilder.DropTable(
-                name: "Category");
+                name: "Categories");
 
             migrationBuilder.DropTable(
                 name: "Payees");
 
             migrationBuilder.DropTable(
-                name: "CategoryGroup");
-
-            migrationBuilder.DropTable(
-                name: "Budgets");
+                name: "CategoryGroups");
         }
     }
 }

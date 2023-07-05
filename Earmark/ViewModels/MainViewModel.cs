@@ -59,7 +59,7 @@ namespace Earmark.ViewModels
                 accountGroup.IsActive = false;
             }
 
-            NavigationItems.Add(new AccountGroupNavigationItem(_accountService.GetAccounts())
+            NavigationItems.Add(new AccountGroupNavigationItem(_accountService, _accountService.GetAccounts())
             {
                 Name = "NavigationItem_Accounts".GetLocalizedResource(),
                 AccountGroupName = "AccountGroupName_AllAccounts".GetLocalizedResource(),

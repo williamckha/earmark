@@ -1,4 +1,5 @@
 ﻿using Earmark.Backend.Models;
+using System;
 using System.Collections.Generic;
 
 namespace Earmark.Backend.Services
@@ -21,7 +22,7 @@ namespace Earmark.Backend.Services
         /// <summary>
         /// Removes the payee.
         /// </summary>
-        /// <param name="payee">The payee to remove.</param>
-        void RemovePayee(Payee payee);
+        /// <param name="payeeId">The ID of the payee to remove.</param>
+        void RemovePayee(Guid payeeId);
     }
 }

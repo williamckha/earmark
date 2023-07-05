@@ -1,33 +1,34 @@
 ﻿using Earmark.Backend.Models;
+using System;
 
 namespace Earmark.Backend.Services
 {
     public interface IBudgetService
     {
-        Budget GetBudget();
+        BudgetMonth GetBudgetMonth(int month, int year);
+
+        int GetTotalBudgetedForMonthInCategory(Guid budgetMonthId, Guid categoryId);
+
+        int GetTotalBalanceForMonthInCategory(Guid budgetMonthId, Guid categoryId);
+
+        int GetTotalOverspentForMonth(Guid budgetMonthId);
+
+        int GetTotalActivityForMonthInCategory(int month, int year, Guid categoryId);
+
+        int GetTotalIncomeForMonth(int month, int year);
 
         BudgetMonth AddBudgetMonth(int month, int year);
 
-        BudgetMonth GetBudgetMonth(int month, int year);
+        BalanceAmount AddBalanceAmount(Guid budgetMonthId, Guid categoryId, int amount);
 
-        decimal GetTotalBudgetedForMonth(BudgetMonth budgetMonth);
+        RolloverAmount AddRolloverAmount(Guid budgetMonthId, Guid categoryId, int amount);
 
-        decimal GetTotalBudgetedForMonth(BudgetMonth budgetMonth, CategoryGroup categoryGroup);
+        BudgetedAmount SetBudgetedAmount(Guid budgetMonthId, Guid categoryId, int amount);
 
-        decimal GetTotalBudgetedForMonth(BudgetMonth budgetMonth, Category category);
+        void UpdateBalanceAmounts(int month, int year, Guid categoryId, int activity);
 
-        decimal GetTotalBalanceForMonth(BudgetMonth budgetMonth);
+        void UpdateTotalUnbudgetedAmounts(int month, int year);
 
-        decimal GetTotalBalanceForMonth(BudgetMonth budgetMonth, CategoryGroup categoryGroup);
-
-        decimal GetTotalBalanceForMonth(BudgetMonth budgetMonth, Category category);
-
-        decimal GetTotalOverspentForMonth(BudgetMonth budgetMonth);
-
-        BudgetedAmount SetBudgetedAmount(BudgetMonth budgetMonth, Category category, decimal amount);
-
-        void UpdateBalanceAmounts(int month, int year, Category category, decimal activity);
-
-        void UpdateTotalUnbudgetedAmounts(int month = 1, int year = 0);
+        void UpdateTotalUnbudgetedAmounts();
     }
 }

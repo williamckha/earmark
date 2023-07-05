@@ -2,7 +2,9 @@
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Earmark.Backend.Helpers;
+using Earmark.Backend.Models;
 using Earmark.Backend.Services;
+using Earmark.Data.Messages;
 using Earmark.Helpers;
 using Earmark.Helpers.Validation;
 using Microsoft.UI.Xaml;
@@ -16,11 +18,8 @@ namespace Earmark.ViewModels.Budget
 {
     public partial class BudgetViewModel : ObservableRecipient
     {
-        private IAccountDetailService _accountDetailService;
         private IBudgetService _budgetService;
         private ICategoriesService _categoriesService;
-
-        private Backend.Models.Budget _budget;
 
         /// <summary>
         /// The currently displayed months in the budget.
@@ -30,7 +29,7 @@ namespace Earmark.ViewModels.Budget
         /// <summary>
         /// The category groups in the budget.
         /// </summary>
-        public ObservableGroupingCollection<CategoryGroupViewModel> CategoryGroups { get; }
+        public ObservableCollection<CategoryGroupViewModel> CategoryGroups { get; }
 
         /// <summary>
         /// The collection view source that adds grouping support to CategoryGroups.
@@ -48,20 +47,16 @@ namespace Earmark.ViewModels.Budget
         public CategoryValidator CategoryValidator { get; }
 
         public BudgetViewModel(
-            IAccountDetailService accountDetailService,
             IBudgetService budgetService, 
             ICategoriesService categoriesService) : base(StrongReferenceMessenger.Default)
         {
-            _accountDetailService = accountDetailService;
             _budgetService = budgetService;
             _categoriesService = categoriesService;
-
-            _budget = _budgetService.GetBudget();
 
             CategoryGroupValidator = new CategoryGroupValidator(_categoriesService);
             CategoryValidator = new CategoryValidator(_categoriesService);
 
-            CategoryGroups = new ObservableGroupingCollection<CategoryGroupViewModel>();
+            CategoryGroups = new ObservableCollection<CategoryGroupViewModel>();
             CategoryGroupsCVS = new CollectionViewSource()
             {
                 Source = CategoryGroups,
@@ -69,13 +64,10 @@ namespace Earmark.ViewModels.Budget
                 ItemsPath = new PropertyPath(nameof(CategoryGroupViewModel.Categories))
             };
 
-            foreach (var categoryGroup in _budget.CategoryGroups)
+            foreach (var categoryGroup in _categoriesService.GetCategoryGroups())
             {
-                CategoryGroups.Add(new CategoryGroupViewModel(_categoriesService, CategoryValidator, categoryGroup));
+                CategoryGroups.Add(new CategoryGroupViewModel(_categoriesService, _budgetService, CategoryValidator, categoryGroup));
             }
-
-            CategoryGroups.CollectionChanged += CategoryGroups_CollectionChanged;
-            CategoryGroups.GroupingChanged += CategoryGroups_GroupingChanged;
 
             Months = new ObservableCollection<BudgetMonthViewModel>();
         }
@@ -88,21 +80,32 @@ namespace Earmark.ViewModels.Budget
             {
                 budgetMonth.IsActive = false;
             }
+
+            foreach (var categoryGroup in CategoryGroups)
+            {
+                categoryGroup.IsActive = false;
+            }
         }
 
         [RelayCommand]
         public void AddCategoryGroup(string categoryGroupName)
         {
             var categoryGroup = _categoriesService.AddCategoryGroup(categoryGroupName);
-            CategoryGroups.Add(new CategoryGroupViewModel(_categoriesService, CategoryValidator, categoryGroup));
+            CategoryGroups.Add(new CategoryGroupViewModel(_categoriesService, _budgetService, CategoryValidator, categoryGroup));
+
+            Messenger.Send(new CategoryGroupAddedMessage(categoryGroup));
         }
 
         [RelayCommand]
         public void RemoveCategoryGroup(CategoryGroupViewModel categoryGroupViewModel)
         {
-            var categoryGroup = _budget.CategoryGroups.First(x => x.Id == categoryGroupViewModel.Id);
-            _categoriesService.RemoveCategoryGroup(categoryGroup);
+            _categoriesService.RemoveCategoryGroup(categoryGroupViewModel.Id);
+            _budgetService.UpdateTotalUnbudgetedAmounts();
+
+            categoryGroupViewModel.IsActive = false;
             CategoryGroups.Remove(categoryGroupViewModel);
+
+            Messenger.Send(new CategoryGroupRemovedMessage(categoryGroupViewModel.Id));
         }
 
         [RelayCommand]
@@ -130,7 +133,7 @@ namespace Earmark.ViewModels.Budget
         {
             if (numberOfMonths != Months.Count())
             {
-                var currentDate = DateTimeOffset.Now;
+                var currentDate = DateTime.Now;
                 var firstMonth = Months.FirstOrDefault();
                 (int month, int year) = firstMonth is not null ?
                     (firstMonth.Month, firstMonth.Year) :
@@ -154,29 +157,10 @@ namespace Earmark.ViewModels.Budget
                     _budgetService.GetBudgetMonth(month, year) ??
                     _budgetService.AddBudgetMonth(month, year);
 
-                Months.Add(new BudgetMonthViewModel(
-                    _accountDetailService, _budgetService, budgetMonth));
+                Months.Add(new BudgetMonthViewModel(_budgetService, _categoriesService, budgetMonth));
 
                 (month, year) = DateTimeHelper.GetNextMonth(month, year);
             }
-        }
-
-        private void RefreshCategoriesInMonths()
-        {
-            foreach (var month in Months)
-            {
-                month.RefreshCategories();
-            }
-        }
-
-        private void CategoryGroups_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            RefreshCategoriesInMonths();
-        }
-
-        private void CategoryGroups_GroupingChanged(object sender, EventArgs e)
-        {
-            RefreshCategoriesInMonths();
         }
     }
 }

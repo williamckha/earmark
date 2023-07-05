@@ -1,34 +1,30 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Earmark.Backend.Models;
 using Earmark.Backend.Services;
-using Earmark.Helpers;
+using Earmark.Data.Messages;
 using Earmark.Helpers.Validation;
+using Earmark.ViewModels.Account;
 using System;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.Linq;
 
 namespace Earmark.ViewModels.Budget
 {
-    public partial class CategoryGroupViewModel : ObservableObject, IObservableGrouping
+    public partial class CategoryGroupViewModel : ObservableRecipient
     {
         private ICategoriesService _categoriesService;
+        private IBudgetService _budgetService;
 
-        private CategoryGroup _categoryGroup;
-
-        public event EventHandler GroupingChanged;
+        /// <summary>
+        /// The ID which identifies the category group.
+        /// </summary>
+        public Guid Id { get; }
 
         /// <summary>
         /// The name of the category group.
         /// </summary>
-        [ObservableProperty]
-        private string _name;
-
-        /// <summary>
-        /// The ID which identifies the grouping.
-        /// </summary>
-        public Guid Id => _categoryGroup.Id;
+        public string Name { get; }
 
         /// <summary>
         /// The categories contained in the category group.
@@ -42,42 +38,63 @@ namespace Earmark.ViewModels.Budget
 
         public CategoryGroupViewModel(
             ICategoriesService categoriesService, 
+            IBudgetService budgetService,
             CategoryValidator categoryValidator, 
-            CategoryGroup categoryGroup)
+            CategoryGroup categoryGroup) : base(StrongReferenceMessenger.Default)
         {
             _categoriesService = categoriesService;
+            _budgetService = budgetService;
 
-            _categoryGroup = categoryGroup;
-            
-            Name = _categoryGroup.Name;
+            Id = categoryGroup.Id;
+            Name = categoryGroup.Name;
+
             CategoryValidator = categoryValidator;
 
             Categories = new ObservableCollection<CategoryViewModel>();
-            Categories.CollectionChanged += Categories_CollectionChanged;
-            foreach (var category in _categoryGroup.Categories)
+            foreach (var category in categoryGroup.Categories)
             {
-                Categories.Add(new CategoryViewModel(category, this));
+                Categories.Add(new CategoryViewModel(category));
+            }
+
+            IsActive = true;
+        }
+
+        protected override void OnActivated()
+        {
+            base.OnActivated();
+
+            Messenger.Register<CategoryGroupViewModel, CategoryGroupViewModelRequestMessage, Guid>(this, Id, (r, m) => m.Reply(r));
+        }
+
+        protected override void OnDeactivated()
+        {
+            base.OnDeactivated();
+
+            foreach (var category in Categories)
+            {
+                category.IsActive = false;
             }
         }
 
         [RelayCommand]
         public void AddCategory(string categoryName)
         {
-            var category = _categoriesService.AddCategory(_categoryGroup, categoryName);
-            Categories.Add(new CategoryViewModel(category, this));
+            var category = _categoriesService.AddCategory(Id, categoryName);
+            Categories.Add(new CategoryViewModel(category));
+
+            Messenger.Send(new CategoryAddedMessage(category), Id);
         }
 
         [RelayCommand]
         public void RemoveCategory(CategoryViewModel categoryViewModel)
         {
-            var category = _categoryGroup.Categories.First(x => x.Id == categoryViewModel.Id);
-            _categoriesService.RemoveCategory(category);
-            Categories.Remove(categoryViewModel);
-        }
+            _categoriesService.RemoveCategory(categoryViewModel.Id);
+            _budgetService.UpdateTotalUnbudgetedAmounts();
 
-        private void Categories_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            GroupingChanged?.Invoke(this, EventArgs.Empty);
+            Categories.Remove(categoryViewModel);
+
+            Messenger.Send(new CategoryRemovedMessage(categoryViewModel.Id), Id);
+            Messenger.Send(new CategoryRemovedMessage(categoryViewModel.Id), nameof(BudgetMonthViewModel));
         }
     }
 }

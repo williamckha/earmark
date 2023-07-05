@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using Earmark.Backend.Models;
+using Earmark.Backend.Services;
 using Earmark.Data.Messages;
 using Earmark.ViewModels.Account;
 using System;
@@ -9,9 +10,12 @@ using System.Linq;
 
 namespace Earmark.Data.Navigation
 {
-    public class AccountGroupNavigationItem : ObservableRecipient, INavigationItem
+    public partial class AccountGroupNavigationItem : ObservableRecipient, INavigationItem
     {
-        private List<Account> _accounts;
+        private IAccountService _accountService;
+
+        [ObservableProperty]
+        private int _totalBalance;
 
         public string Name { get; init; }
 
@@ -21,21 +25,21 @@ namespace Earmark.Data.Navigation
 
         public Type TargetViewModel => typeof(AccountViewModel);
 
-        public object Parameter => new AccountGroup(AccountGroupName, _accounts.Select(x => x.Id));
-
-        public decimal TotalBalance => _accounts.SelectMany(x => x.Transactions).Sum(x => x.Amount);
+        public object Parameter => new AccountGroup(AccountGroupName, AccountNavigationItems.Select(x => x.Id));
 
         public List<AccountNavigationItem> AccountNavigationItems { get; }
 
-        public AccountGroupNavigationItem(IEnumerable<Account> accounts) : base(StrongReferenceMessenger.Default)
+        public AccountGroupNavigationItem(IAccountService accountService, IEnumerable<Account> accounts) : base(StrongReferenceMessenger.Default)
         {
-            _accounts = accounts.ToList();
+            _accountService = accountService;
 
             AccountNavigationItems = new List<AccountNavigationItem>();
-            foreach (var account in _accounts)
+            foreach (var account in accounts)
             {
                 AccountNavigationItems.Add(new AccountNavigationItem(account));
             }
+
+            UpdateTotalBalances();
 
             IsActive = true;
         }
@@ -44,20 +48,19 @@ namespace Earmark.Data.Navigation
         {
             base.OnActivated();
            
-            Messenger.Register<AccountGroupNavigationItem, AccountBalanceChangedMessage>(this, (r, m) =>
-            {
-                r.OnPropertyChanged(nameof(TotalBalance));
-            });
+            Messenger.Register<AccountGroupNavigationItem, AccountBalanceChangedMessage>(this, (r, m) => r.UpdateTotalBalances());
         }
 
-        protected override void OnDeactivated()
+        private void UpdateTotalBalances()
         {
-            base.OnDeactivated();
-
+            var accounts = _accountService.GetAccounts();
             foreach (var accountNavigationItem in AccountNavigationItems)
             {
-                accountNavigationItem.IsActive = false;
+                var account = accounts.First(x => x.Id == accountNavigationItem.Id);
+                accountNavigationItem.TotalBalance = account.TotalBalance;
             }
+
+            TotalBalance = AccountNavigationItems.Sum(x => x.TotalBalance);
         }
     }
 }

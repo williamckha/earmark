@@ -170,11 +170,11 @@
                             <ColumnDefinition Width="120" />
                         </Grid.ColumnDefinitions>
 
-                        <CalendarDatePicker Grid.Column="0"
+                        <!--<CalendarDatePicker Grid.Column="0"
                                             HorizontalAlignment="Stretch"
                                             Background="Transparent"
                                             BorderBrush="Transparent"
-                                            Date="{x:Bind Date, Mode=TwoWay}" />
+                                            Date="{x:Bind Date, Mode=TwoWay}" />-->
 
                         <uc:SuggestionBox x:Uid="AccountSuggestionBox"
                                           Grid.Column="1"

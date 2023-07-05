@@ -15,20 +15,69 @@ namespace Earmark.ViewModels.Budget
 {
     public partial class BudgetMonthViewModel : ObservableRecipient
     {
-        private IAccountDetailService _accountDetailService;
         private IBudgetService _budgetService;
+        private ICategoriesService _categoriesService;
 
         private BudgetMonth _budgetMonth;
 
         /// <summary>
-        /// The month.
+        /// The total amount of money budgeted for the month.
         /// </summary>
-        public int Month => _budgetMonth.Month;
+        [ObservableProperty]
+        private int _totalBudgeted;
 
         /// <summary>
-        /// The year of the month.
+        /// The total sum of inflows and outflows for the month.
         /// </summary>
-        public int Year => _budgetMonth.Year;
+        [ObservableProperty]
+        private int _totalActivity;
+
+        /// <summary>
+        /// The total amount of money available for the month.
+        /// </summary>
+        [ObservableProperty]
+        private int _totalBalance;
+
+        /// <summary>
+        /// The total amount of money unbudgeted last month that was carried forward to
+        /// the current month.
+        /// </summary>
+        [ObservableProperty]
+        private int _unbudgetedLastMonth;
+
+        /// <summary>
+        /// The total amount of money overspent last month that was carried forward to
+        /// the current month.
+        /// </summary>
+        [ObservableProperty]
+        private int _overspentLastMonth;
+
+        /// <summary>
+        /// The total income for the month.
+        /// </summary>
+        [ObservableProperty]
+        private int _totalIncome;
+
+        /// <summary>
+        /// The total amount of money unbudgeted for the month.
+        /// </summary>
+        [ObservableProperty]
+        private int _totalUnbudgeted;
+
+        /// <summary>
+        /// The unique ID that identifies the budget month.
+        /// </summary>
+        public Guid Id { get; }
+
+        /// <summary>
+        /// The month of the budget month.
+        /// </summary>
+        public int Month { get; }
+
+        /// <summary>
+        /// The year of the budget month.
+        /// </summary>
+        public int Year { get; }
 
         /// <summary>
         /// Whether the month is the current month of the current year.
@@ -37,7 +86,7 @@ namespace Earmark.ViewModels.Budget
         {
             get
             {
-                var currentDate = DateTimeOffset.Now;
+                var currentDate = DateTime.Now;
                 return currentDate.Month == Month && currentDate.Year == Year;
             }
         }
@@ -52,59 +101,18 @@ namespace Earmark.ViewModels.Budget
         /// </summary>
         public CollectionViewSource CategoryGroupsCVS { get; }
 
-        /// <summary>
-        /// The total amount of money unbudgeted last month that was carried forward to
-        /// the current month.
-        /// </summary>
-        public decimal UnbudgetedLastMonth => GetLastBudgetMonth()?.TotalUnbudgeted ?? decimal.Zero;
-
-        /// <summary>
-        /// The total amount of money overspent last month that was carried forward to
-        /// the current month.
-        /// </summary>
-        public decimal OverspentLastMonth
-        {
-            get
-            {
-                return (GetLastBudgetMonth() is BudgetMonth lastBudgetMonth) ? 
-                    _budgetService.GetTotalOverspentForMonth(lastBudgetMonth) : decimal.Zero;
-            }
-        }
-
-        /// <summary>
-        /// The total amount of money budgeted for the month.
-        /// </summary>
-        public decimal TotalBudgeted => _budgetService.GetTotalBudgetedForMonth(_budgetMonth);
-
-        /// <summary>
-        /// The total sum of inflows and outflows for the month.
-        /// </summary>
-        public decimal TotalActivity => _accountDetailService.GetTotalActivityForMonth(_budgetMonth.Month, _budgetMonth.Year);
-
-        /// <summary>
-        /// The total amount of money available for the month.
-        /// </summary>
-        public decimal TotalBalance => _budgetService.GetTotalBalanceForMonth(_budgetMonth);
-
-        /// <summary>
-        /// The total income for the month.
-        /// </summary>
-        public decimal TotalIncome => _accountDetailService.GetTotalIncomeForMonth(_budgetMonth.Month, _budgetMonth.Year);
-
-        /// <summary>
-        /// The total amount of money unbudgeted for the month.
-        /// </summary>
-        public decimal TotalUnbudgeted => _budgetMonth.TotalUnbudgeted;
-
         public BudgetMonthViewModel(
-            IAccountDetailService accountDetailService, 
             IBudgetService budgetService, 
+            ICategoriesService categoriesService,
             BudgetMonth budgetMonth) : base(StrongReferenceMessenger.Default)
         {
-            _accountDetailService = accountDetailService;
             _budgetService = budgetService;
-
+            _categoriesService = categoriesService;
             _budgetMonth = budgetMonth;
+
+            Id = budgetMonth.Id;
+            Month = budgetMonth.Month;
+            Year = budgetMonth.Year;
 
             CategoryGroups = new ObservableCollection<BudgetMonthCategoryGroupViewModel>();
             CategoryGroupsCVS = new CollectionViewSource()
@@ -114,7 +122,12 @@ namespace Earmark.ViewModels.Budget
                 ItemsPath = new PropertyPath(nameof(BudgetMonthCategoryGroupViewModel.Categories))
             };
 
-            RefreshCategories();
+            foreach (var categoryGroup in _categoriesService.GetCategoryGroups())
+            {
+                CategoryGroups.Add(new BudgetMonthCategoryGroupViewModel(_budgetService, budgetMonth, categoryGroup));
+            }
+
+            UpdateCalculatedAndActivityProperties();
 
             IsActive = true;
         }
@@ -123,14 +136,29 @@ namespace Earmark.ViewModels.Budget
         {
             base.OnActivated();
 
-            Messenger.Register<BudgetMonthViewModel, BudgetedAmountChangedMessage>(this, (r, m) =>
+            Messenger.Register<BudgetMonthViewModel, BudgetedAmountChangedMessage, string>(this, nameof(BudgetMonthViewModel), (r, m) =>
             {
-                r.DetailPropertiesChanged();
+                r.UpdateCalculatedProperties();
             });
 
-            Messenger.Register<BudgetMonthViewModel, BudgetedAmountResetMessage>(this, (r, m) =>
+            Messenger.Register<BudgetMonthViewModel, CategoryGroupAddedMessage>(this, (r, m) =>
             {
-                r.DetailPropertiesChanged();
+                r.CategoryGroups.Add(new BudgetMonthCategoryGroupViewModel(r._budgetService, r._budgetMonth, m.CategoryGroup));
+            });
+
+            Messenger.Register<BudgetMonthViewModel, CategoryGroupRemovedMessage>(this, (r, m) =>
+            {
+                var categoryGroupViewModel = r.CategoryGroups.First(x => x.CategoryGroupId == m.CategoryGroupId);
+
+                categoryGroupViewModel.IsActive = false;
+                r.CategoryGroups.Remove(categoryGroupViewModel);
+
+                r.UpdateCalculatedAndActivityProperties();
+            });
+
+            Messenger.Register<BudgetMonthViewModel, CategoryRemovedMessage, string>(this, nameof(BudgetMonthViewModel), (r, m) =>
+            {
+                r.UpdateCalculatedAndActivityProperties();
             });
         }
 
@@ -144,73 +172,61 @@ namespace Earmark.ViewModels.Budget
             }
         }
 
-        public void RefreshCategories()
-        {
-            foreach (var category in CategoryGroups)
-            {
-                category.IsActive = false;
-            }
-            CategoryGroups.Clear();
-
-            foreach (var categoryGroup in _budgetMonth.Budget.CategoryGroups)
-            {
-                CategoryGroups.Add(new BudgetMonthCategoryGroupViewModel(
-                    _accountDetailService, _budgetService, _budgetMonth, categoryGroup));
-            }
-
-            DetailPropertiesChanged();
-            OnPropertyChanged(nameof(TotalActivity));
-        }
-
         [RelayCommand]
         public void CopyBudgetedAmountsFromLastMonth()
         {
-            var lastBudgetMonth = GetLastBudgetMonth();
-            if (lastBudgetMonth is null)
-            {
-                ZeroAllBudgetedAmounts();
-                return;
-            }
+            //var lastBudgetMonth = GetLastBudgetMonth();
+            //if (lastBudgetMonth is null)
+            //{
+            //    ZeroAllBudgetedAmounts();
+            //    return;
+            //}
 
-            foreach (var category in _budgetMonth.Budget.CategoryGroups.SelectMany(x => x.Categories))
-            {
-                var lastMonthBudgetedAmount = _budgetService.GetTotalBudgetedForMonth(lastBudgetMonth, category);
-                if (_budgetService.GetTotalBudgetedForMonth(_budgetMonth, category) != lastMonthBudgetedAmount)
-                {
-                    _budgetService.SetBudgetedAmount(_budgetMonth, category, lastMonthBudgetedAmount);
-                }
-            }
+            //foreach (var category in _categoriesService.GetCategoryGroups().SelectMany(x => x.Categories))
+            //{
+            //    var lastMonthBudgetedAmount = _budgetService.GetTotalBudgetedForMonth(lastBudgetMonth, category);
+            //    if (_budgetService.GetTotalBudgetedForMonth(_budgetMonth, category) != lastMonthBudgetedAmount)
+            //    {
+            //        _budgetService.SetBudgetedAmount(_budgetMonth.Id, category.Id, lastMonthBudgetedAmount);
+            //    }
+            //}
 
-            Messenger.Send(new BudgetedAmountResetMessage(_budgetMonth));
+            //Messenger.Send(new BudgetedAmountResetMessage(_budgetMonth));
         }
 
         [RelayCommand]
         public void ZeroAllBudgetedAmounts()
         {
-            foreach (var category in _budgetMonth.Budget.CategoryGroups.SelectMany(x => x.Categories))
-            {
-                if (_budgetService.GetTotalBudgetedForMonth(_budgetMonth, category) != decimal.Zero)
-                {
-                    _budgetService.SetBudgetedAmount(_budgetMonth, category, decimal.Zero);
-                }
-            }
+            //foreach (var category in _categoriesService.GetCategoryGroups().SelectMany(x => x.Categories))
+            //{
+            //    if (_budgetService.GetTotalBudgetedForMonthInCategory(_budgetMonth.Id, category.Id) != 0)
+            //    {
+            //        _budgetService.SetBudgetedAmount(_budgetMonth.Id, category.Id, 0);
+            //    }
+            //}
 
-            Messenger.Send(new BudgetedAmountResetMessage(_budgetMonth));
+            //Messenger.Send(new BudgetedAmountResetMessage(_budgetMonth));
         }
 
-        private BudgetMonth GetLastBudgetMonth()
+        private void UpdateCalculatedProperties()
         {
-            (int lastMonth, int yearOfLastMonth) = DateTimeHelper.GetPreviousMonth(_budgetMonth.Month, _budgetMonth.Year);
-            return _budgetService.GetBudgetMonth(lastMonth, yearOfLastMonth);
+            TotalBudgeted = CategoryGroups.Sum(x => x.TotalBudgeted);
+            TotalBalance = CategoryGroups.Sum(x => x.TotalBalance);
+            TotalUnbudgeted = _budgetService.GetBudgetMonth(Month, Year).TotalUnbudgeted;
+
+            (int lastMonth, int yearOfLastMonth) = DateTimeHelper.GetPreviousMonth(Month, Year);
+            var lastBudgetMonth = _budgetService.GetBudgetMonth(lastMonth, yearOfLastMonth);
+
+            UnbudgetedLastMonth = lastBudgetMonth?.TotalUnbudgeted ?? 0;
+            OverspentLastMonth = (lastBudgetMonth is not null) ?
+                _budgetService.GetTotalOverspentForMonth(lastBudgetMonth.Id) : 0;
         }
 
-        private void DetailPropertiesChanged()
+        private void UpdateCalculatedAndActivityProperties()
         {
-            OnPropertyChanged(nameof(TotalBudgeted));
-            OnPropertyChanged(nameof(TotalBalance));
-            OnPropertyChanged(nameof(UnbudgetedLastMonth));
-            OnPropertyChanged(nameof(OverspentLastMonth));
-            OnPropertyChanged(nameof(TotalUnbudgeted));
+            UpdateCalculatedProperties();
+            TotalActivity = CategoryGroups.Sum(x => x.TotalActivity);
+            TotalIncome = _budgetService.GetTotalIncomeForMonth(Month, Year);
         }
     }
 }

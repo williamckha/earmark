@@ -7,11 +7,11 @@ namespace Earmark.Backend.Models
     {
         public Guid Id { get; set; }
 
-        public DateTimeOffset Date { get; set; }
+        public DateTime Date { get; set; }
 
         public string Memo { get; set; }
 
-        public decimal Amount { get; set; }
+        public int Amount { get; set; }
 
         [Required]
         public Account Account { get; set; }

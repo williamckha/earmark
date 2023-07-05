@@ -12,10 +12,7 @@ namespace Earmark.Backend.Models
 
         public int Year { get; set; }
 
-        public decimal TotalUnbudgeted { get; set; }
-
-        [Required]
-        public Budget Budget { get; set; }
+        public int TotalUnbudgeted { get; set; }
 
         public List<BudgetedAmount> BudgetedAmounts { get; set; }
 

@@ -13,7 +13,7 @@ namespace Earmark.Backend.Models
         /// <summary>
         /// The amount in the category that was rolled over into the month.
         /// </summary>
-        public decimal Amount { get; set; }
+        public int Amount { get; set; }
 
         /// <summary>
         /// The month associated with the rollover amount.

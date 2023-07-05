@@ -1,35 +1,41 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Earmark.Backend.Models;
+using Earmark.Data.Messages;
 using System;
 
 namespace Earmark.ViewModels.Budget
 {
-    public partial class CategoryViewModel : ObservableObject
+    public partial class CategoryViewModel : ObservableRecipient
     {
-        private Category _category;
+        /// <summary>
+        /// The unique ID that identifies the category.
+        /// </summary>
+        public Guid Id { get; }
+        
+        /// <summary>
+        /// The unique ID that identifies the category group of the category.
+        /// </summary>
+        public Guid GroupId { get; }
 
         /// <summary>
         /// The name of the category.
         /// </summary>
-        [ObservableProperty]
-        private string _name;
+        public string Name { get; }
 
-        /// <summary>
-        /// The ID that identifies the category.
-        /// </summary>
-        public Guid Id => _category.Id;
-
-        /// <summary>
-        /// The category group which contains the category.
-        /// </summary>
-        public CategoryGroupViewModel Group { get; set; }
-
-        public CategoryViewModel(Category category, CategoryGroupViewModel group)
+        public CategoryViewModel(Category category) : base(StrongReferenceMessenger.Default)
         {
-            _category = category;
+            Id = category.Id;
+            GroupId = category.Group.Id;
+            Name = category.Name;
+        }
 
-            Name = _category.Name;
-            Group = group;
+        [RelayCommand]
+        public void RemoveCategory()
+        {
+            CategoryGroupViewModel categoryGroupViewModel = Messenger.Send(new CategoryGroupViewModelRequestMessage(), GroupId);
+            categoryGroupViewModel.RemoveCategory(this);
         }
     }
 }

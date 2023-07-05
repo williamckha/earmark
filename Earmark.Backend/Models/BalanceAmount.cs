@@ -13,7 +13,7 @@ namespace Earmark.Backend.Models
         /// <summary>
         /// The balance in the category for the month.
         /// </summary>
-        public decimal Amount { get; set; }
+        public int Amount { get; set; }
 
         /// <summary>
         /// The month associated with the balance amount.

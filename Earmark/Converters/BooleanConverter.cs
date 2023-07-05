@@ -16,8 +16,8 @@
         }
 
         /// <summary>
-        /// Returns true if the decimal is not zero.
+        /// Returns true if the integer is not zero.
         /// </summary>
-        public static bool IfNotZero(this decimal value) => value != decimal.Zero;
+        public static bool IfNotZero(this int value) => value != 0;
     }
 }

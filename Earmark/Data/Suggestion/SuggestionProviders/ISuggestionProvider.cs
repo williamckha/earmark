@@ -1,15 +1,14 @@
 ﻿using System.Collections.Generic;
 
-namespace Earmark.Data.Suggestion
+namespace Earmark.Data.Suggestion.SuggestionProviders
 {
     public interface ISuggestionProvider
     {
         /// <summary>
-        /// Generates suggestions based on a provided query.
+        /// Prepares for a sequence of queries for suggestions by refreshing the data backing the SuggestionProvider.
+        /// This ensures that the suggestions provided by the SuggestionProvider are up to date with the data model.
         /// </summary>
-        /// <param name="query">The query to use when generating suggestions.</param>
-        /// <returns>The generated suggestions based on the provided query.</returns>
-        IEnumerable<ISuggestion> GetSuggestionsByQuery(string query);
+        void PrepareForQuery();
 
         /// <summary>
         /// Generates suggestions based on a provided query and a specified object to compare against a predicate.

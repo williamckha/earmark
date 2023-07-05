@@ -13,7 +13,7 @@ namespace Earmark.UserControls.Budget
             this.InitializeComponent();
         }
 
-        public static SolidColorBrush GetCategoryActivityForegroundBrush(decimal value)
+        public static SolidColorBrush GetCategoryActivityForegroundBrush(int value)
         {
             if (value == 0)
             {
@@ -25,7 +25,7 @@ namespace Earmark.UserControls.Budget
             }
         }
 
-        public static SolidColorBrush GetCategoryBalanceForegroundBrush(decimal value)
+        public static SolidColorBrush GetCategoryBalanceForegroundBrush(int value)
         {
             if (value < 0)
             {

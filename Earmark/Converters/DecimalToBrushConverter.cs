@@ -4,7 +4,7 @@ namespace Earmark.Converters
 {
     public static class DecimalToBrushConverter
     {
-        public static SolidColorBrush GetConditionalForegroundBrush(decimal value)
+        public static SolidColorBrush GetConditionalForegroundBrush(int value)
         {
             if (value > 0)
             {
@@ -20,7 +20,7 @@ namespace Earmark.Converters
             }
         }
 
-        public static SolidColorBrush GetConditionalWithFadedZeroForegroundBrush(decimal value)
+        public static SolidColorBrush GetConditionalWithFadedZeroForegroundBrush(int value)
         {
             if (value > 0)
             {
@@ -36,7 +36,7 @@ namespace Earmark.Converters
             }
         }
 
-        public static SolidColorBrush GetRedWhenNegativeForegroundBrush(decimal value)
+        public static SolidColorBrush GetRedWhenNegativeForegroundBrush(int value)
         {
             if (value < 0)
             {

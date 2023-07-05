@@ -28,25 +28,37 @@ namespace Earmark.Backend.Services.TransactionImporter
             using (var reader = new StreamReader(filePath))
             using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
             {
+                var accounts = new List<Account>(_accountService.GetAccounts());
+                var payees = new List<Payee>(_payeeService.GetPayees());
+
                 var csvTransactions = csv.GetRecords<CsvTransaction>();
                 foreach (var csvTransaction in csvTransactions)
                 {
-                    var account =
-                        _accountService.GetAccounts().FirstOrDefault(x => x.Name == csvTransaction.Account) ??
-                        _accountService.AddAccount(csvTransaction.Account);
+                    var account = accounts.FirstOrDefault(x => x.Name == csvTransaction.Account);
+                    if (account is null)
+                    {
+                        account = _accountService.AddAccount(csvTransaction.Account);
+                        accounts.Add(account);
+                    }
 
                     var transaction = _accountService.AddTransaction(
-                        account, csvTransaction.Date, csvTransaction.Amount);
+                        account.Id, csvTransaction.Date, csvTransaction.Amount);
 
                     if (!string.IsNullOrEmpty(csvTransaction.Memo))
                     {
-                        _accountService.SetMemoForTransaction(transaction, csvTransaction.Memo);
+                        _accountService.SetMemoForTransaction(transaction.Id, csvTransaction.Memo);
+                        transaction.Memo = csvTransaction.Memo;
                     }
 
-                    var payee = 
-                        _payeeService.GetPayees().FirstOrDefault(x => x.Name == csvTransaction.Payee) ??
-                        _payeeService.AddPayee(csvTransaction.Payee);
-                    _accountService.SetPayeeForTransaction(transaction, payee);
+                    var payee = payees.FirstOrDefault(x => x.Name == csvTransaction.Payee);
+                    if (payee is null)
+                    {
+                        payee = _payeeService.AddPayee(csvTransaction.Payee);
+                        payees.Add(payee);
+                    }
+                        
+                    _accountService.SetPayeeForTransaction(transaction.Id, payee.Id);
+                    transaction.Payee = payee;
 
                     transactions.Add(transaction);
                 }
@@ -58,7 +70,7 @@ namespace Earmark.Backend.Services.TransactionImporter
 
     public class CsvTransaction
     {
-        public DateTimeOffset Date { get; set; }
+        public DateTime Date { get; set; }
 
         public string Account { get; set; }
 
@@ -66,6 +78,6 @@ namespace Earmark.Backend.Services.TransactionImporter
 
         public string Memo { get; set; }
 
-        public decimal Amount { get; set; }
+        public int Amount { get; set; }
     }
 }

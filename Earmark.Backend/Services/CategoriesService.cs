@@ -1,4 +1,7 @@
-﻿using Earmark.Backend.Models;
+﻿using Earmark.Backend.Database;
+using Earmark.Backend.Models;
+using EntityFramework.DbContextScope.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,157 +10,132 @@ namespace Earmark.Backend.Services
 {
     public class CategoriesService : ICategoriesService
     {
+        private IDbContextScopeFactory _dbContextScopeFactory;
         private IBudgetService _budgetService;
 
-        public CategoriesService(IBudgetService budgetService)
+        public CategoriesService(IDbContextScopeFactory dbContextScopeFactory, IBudgetService budgetService)
         {
+            _dbContextScopeFactory = dbContextScopeFactory;
             _budgetService = budgetService;
         }
 
         public IEnumerable<CategoryGroup> GetCategoryGroups()
         {
-            return _budgetService
-                .GetBudget()
-                .CategoryGroups;
+            using (var dbContextScope = _dbContextScopeFactory.CreateReadOnly())
+            {
+                return dbContextScope.DbContexts.Get<AppDbContext>().CategoryGroups
+                    .Include(x => x.Categories.OrderBy(x => x.Position))
+                    .OrderBy(x => x.Position)
+                    .AsNoTracking()
+                    .ToList();
+            }
         }
 
         public IEnumerable<Category> GetCategories()
         {
-            return _budgetService
-                .GetBudget()
-                .CategoryGroups
-                .SelectMany(x => x.Categories);
+            using (var dbContextScope = _dbContextScopeFactory.CreateReadOnly())
+            {
+                return dbContextScope.DbContexts.Get<AppDbContext>().Categories
+                    .OrderBy(x => x.Position)
+                    .AsNoTracking()
+                    .ToList();
+            }
         }
 
         public CategoryGroup AddCategoryGroup(string name)
         {
-            var budget = _budgetService.GetBudget();
-
-            if (budget.CategoryGroups.Any(x => x.Name == name))
-                throw new ArgumentException("Category group with the same name already exists.");
-
-            var categoryGroup = new CategoryGroup()
+            using (var dbContextScope = _dbContextScopeFactory.Create())
             {
-                Id = Guid.NewGuid(),
-                Position = budget.CategoryGroups.Count(),
-                Name = name,
-                IsIncome = false,
-                Budget = budget,
-                Categories = new List<Category>()
-            };
+                var dbContext = dbContextScope.DbContexts.Get<AppDbContext>();
 
-            budget.CategoryGroups.Add(categoryGroup);
+                if (dbContext.CategoryGroups.Any(x => x.Name == name))
+                    throw new ArgumentException("Category group with the same name already exists.");
 
-            return categoryGroup;
+                var categoryGroup = new CategoryGroup()
+                {
+                    Id = Guid.NewGuid(),
+                    Position = dbContext.Categories.Count(),
+                    Name = name,
+                    IsIncome = false,
+                    Categories = new List<Category>()
+                };
+
+                dbContext.CategoryGroups.Add(categoryGroup);
+                dbContextScope.SaveChanges();
+                return categoryGroup;
+            }
         }
 
-        public Category AddCategory(CategoryGroup categoryGroup, string name)
+        public Category AddCategory(Guid categoryGroupId, string name)
         {
-            if (categoryGroup is null) throw new ArgumentNullException(nameof(categoryGroup));
-
-            if (categoryGroup.Categories.Any(x => x.Name == name))
-                throw new ArgumentException("Category with the same name already exists.");
-
-            var category = new Category()
+            using (var dbContextScope = _dbContextScopeFactory.Create())
             {
-                Id = Guid.NewGuid(),
-                Position = categoryGroup.Categories.Count(),
-                Name = name,
-                IsIncome = false,
-                Group = categoryGroup,
-                BudgetedAmounts = new List<BudgetedAmount>(),
-                BalanceAmounts = new List<BalanceAmount>(),
-                RolloverAmounts = new List<RolloverAmount>(),
-                Transactions = new List<Transaction>()
-            };
+                var dbContext = dbContextScope.DbContexts.Get<AppDbContext>();
+                
+                if (dbContext.Categories.Any(x => x.Name == name))
+                    throw new ArgumentException("Category with the same name already exists.");
 
-            categoryGroup.Categories.Add(category);
+                var categoryGroup = dbContext.CategoryGroups
+                    .Include(x => x.Categories)
+                    .First(x => x.Id == categoryGroupId);
 
-            return category;
+                var category = new Category()
+                {
+                    Id = Guid.NewGuid(),
+                    Position = categoryGroup.Categories.Count(),
+                    Name = name,
+                    IsIncome = false,
+                    Group = categoryGroup
+                };
+
+                dbContext.Categories.Add(category);
+
+                var budgetMonthIds = dbContext.BudgetMonths.Select(x => x.Id).ToList();
+                foreach (var budgetMonthId in budgetMonthIds)
+                {
+                    _budgetService.AddBalanceAmount(budgetMonthId, category.Id, 0);
+                    _budgetService.AddRolloverAmount(budgetMonthId, category.Id, 0);
+                }
+
+                dbContextScope.SaveChanges();
+                return category;
+            }
         }
 
-        public void RemoveCategoryGroup(CategoryGroup categoryGroup)
+        public void RemoveCategoryGroup(Guid categoryGroupId)
         {
-            if (categoryGroup is null) throw new ArgumentNullException(nameof(categoryGroup));
-
-            while (categoryGroup.Categories.Any())
+            using (var dbContextScope = _dbContextScopeFactory.Create())
             {
-                RemoveCategory(categoryGroup.Categories.First(), updateUnbudgetedAmounts: false);
+                var dbContext = dbContextScope.DbContexts.Get<AppDbContext>();
+
+                var categoryGroup = dbContext.CategoryGroups.First(x => x.Id == categoryGroupId);
+
+                dbContext.CategoryGroups
+                    .Where(x => x.Position > categoryGroup.Position)
+                    .ExecuteUpdate(setters => setters.SetProperty(x => x.Position, x => x.Position - 1));
+
+                dbContext.CategoryGroups.Remove(categoryGroup);
+
+                dbContextScope.SaveChanges();
             }
-
-            var budget = _budgetService.GetBudget();
-            budget.CategoryGroups.Remove(categoryGroup);
-            categoryGroup.Budget = null;
-
-            for (int position = 0; position < budget.CategoryGroups.Count(); position++)
-            {
-                budget.CategoryGroups[position].Position = position;
-            }
-
-            _budgetService.UpdateTotalUnbudgetedAmounts();
         }
 
-        public void RemoveCategory(Category category)
+        public void RemoveCategory(Guid categoryId)
         {
-            RemoveCategory(category, updateUnbudgetedAmounts: true);
-        }
-
-        private void RemoveCategory(Category category, bool updateUnbudgetedAmounts)
-        {
-            if (category is null) throw new ArgumentNullException(nameof(category));
-
-            while (category.BudgetedAmounts.Any())
+            using (var dbContextScope = _dbContextScopeFactory.Create())
             {
-                var budgetedAmount = category.BudgetedAmounts.First();
+                var dbContext = dbContextScope.DbContexts.Get<AppDbContext>();
 
-                budgetedAmount.Month.BudgetedAmounts.Remove(budgetedAmount);
-                budgetedAmount.Month = null;
+                var category = dbContext.Categories.First(x => x.Id == categoryId);
+                dbContext.Entry(category).Reference(x => x.Group).Load();
 
-                budgetedAmount.Category.BudgetedAmounts.Remove(budgetedAmount);
-                budgetedAmount.Category = null;
-            }
+                dbContext.Categories
+                    .Where(x => x.Group.Id == category.Group.Id && x.Position > category.Position)
+                    .ExecuteUpdate(setters => setters.SetProperty(x => x.Position, x => x.Position - 1));
 
-            while (category.BalanceAmounts.Any())
-            {
-                var balanceAmount = category.BalanceAmounts.First();
+                category.Group = null;
 
-                balanceAmount.Month.BalanceAmounts.Remove(balanceAmount);
-                balanceAmount.Month = null;
-
-                balanceAmount.Category.BalanceAmounts.Remove(balanceAmount);
-                balanceAmount.Category = null;
-            }
-            
-            while (category.RolloverAmounts.Any())
-            {
-                var rolloverAmount = category.RolloverAmounts.First();
-
-                rolloverAmount.Month.RolloverAmounts.Remove(rolloverAmount);
-                rolloverAmount.Month = null;
-
-                rolloverAmount.Category.RolloverAmounts.Remove(rolloverAmount);
-                rolloverAmount.Category = null;
-            }
-
-            while (category.Transactions.Any())
-            {
-                var transaction = category.Transactions.First();
-                category.Transactions.Remove(transaction);
-                transaction.Category = null;
-            }
-
-            var categoryGroup = category.Group;
-            categoryGroup.Categories.Remove(category);
-            category.Group = null;
-
-            for (int position = 0; position < categoryGroup.Categories.Count(); position++)
-            {
-                categoryGroup.Categories[position].Position = position;
-            }
-
-            if (updateUnbudgetedAmounts)
-            {
-                _budgetService.UpdateTotalUnbudgetedAmounts();
+                dbContextScope.SaveChanges();
             }
         }
     }

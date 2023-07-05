@@ -9,9 +9,9 @@
              mc:Ignorable="d">
 
     <UserControl.Resources>
-        <conv:DecimalToDoubleConverter x:Key="DecimalToDoubleConverter" />
+        <conv:CurrencyIntegerToDoubleConverter x:Key="CurrencyIntegerToDoubleConverter" />
     </UserControl.Resources>
-
+    
     <Grid Height="32">
 
         <TextBlock x:Name="TextBlock"
@@ -31,7 +31,7 @@
                                AcceptsExpression="True"
                                NumberHorizontalAlignment="Right"
                                IsDeleteButtonVisible="False"
-                               Value="{x:Bind Value, Mode=TwoWay, Converter={StaticResource DecimalToDoubleConverter}}"
+                               Value="{x:Bind Value, Mode=TwoWay, Converter={StaticResource CurrencyIntegerToDoubleConverter}}"
                                Loaded="NumberBox_Loaded" />
 
     </Grid>

@@ -1,4 +1,5 @@
 using Earmark.Data.Suggestion;
+using Earmark.Data.Suggestion.SuggestionProviders;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -69,6 +70,8 @@ namespace Earmark.UserControls
         {
             this.IsTabStop = false;
             this.GotFocus -= SuggestionBox_GotFocus;
+
+            SuggestionProvider.PrepareForQuery();
 
             TextBlock.Visibility = Visibility.Collapsed;
             AutoSuggestBox.Visibility = Visibility.Visible;

@@ -55,7 +55,7 @@ namespace Earmark.Backend.Services
             {
                 var dbContext = dbContextScope.DbContexts.Get<AppDbContext>();
 
-                var payee = dbContext.Payees.FirstOrDefault(x => x.Id == payeeId);
+                var payee = dbContext.Payees.Find(payeeId);
                 dbContext.Entry(payee).Reference(x => x.TransferAccount).Load();
 
                 if (payee.TransferAccount is not null)

@@ -54,7 +54,7 @@ namespace Earmark.Backend.Services
             {
                 var dbContext = dbContextScope.DbContexts.Get<AppDbContext>();
 
-                var budgetMonth = dbContext.BudgetMonths.First(x => x.Id == budgetMonthId);
+                var budgetMonth = dbContext.BudgetMonths.Find(budgetMonthId);
                 dbContext.Entry(budgetMonth).Collection(x => x.BalanceAmounts).Load();
 
                 var totalOverspent = budgetMonth.BalanceAmounts.Select(x => Math.Min(x.Amount, 0)).Sum();

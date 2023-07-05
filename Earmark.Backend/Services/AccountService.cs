@@ -95,7 +95,7 @@ namespace Earmark.Backend.Services
             {
                 var dbContext = dbContextScope.DbContexts.Get<AppDbContext>();
 
-                var account = dbContext.Accounts.First(x => x.Id == accountId);
+                var account = dbContext.Accounts.Find(accountId);
 
                 var transaction = new Transaction()
                 {
@@ -120,7 +120,7 @@ namespace Earmark.Backend.Services
             {
                 var dbContext = dbContextScope.DbContexts.Get<AppDbContext>();
 
-                var transaction = dbContext.Transactions.First(x => x.Id == transactionId);
+                var transaction = dbContext.Transactions.Find(transactionId);
                 dbContext.Entry(transaction).Reference(x => x.Category).Load();
                 dbContext.Entry(transaction).Reference(x => x.TransferTransaction).Load();
 
@@ -151,7 +151,7 @@ namespace Earmark.Backend.Services
             {
                 var dbContext = dbContextScope.DbContexts.Get<AppDbContext>();
 
-                var transaction = dbContext.Transactions.First(x => x.Id == transactionId);
+                var transaction = dbContext.Transactions.Find(transactionId);
                 dbContext.Entry(transaction).Reference(x => x.TransferTransaction).Load();
 
                 transaction.Memo = memo;
@@ -171,7 +171,7 @@ namespace Earmark.Backend.Services
             {
                 var dbContext = dbContextScope.DbContexts.Get<AppDbContext>();
 
-                var transaction = dbContext.Transactions.First(x => x.Id == transactionId);
+                var transaction = dbContext.Transactions.Find(transactionId);
                 dbContext.Entry(transaction).Reference(x => x.Account).Load();
                 dbContext.Entry(transaction).Reference(x => x.Category).Load();
                 dbContext.Entry(transaction).Reference(x => x.TransferTransaction).Load();
@@ -205,11 +205,11 @@ namespace Earmark.Backend.Services
             {
                 var dbContext = dbContextScope.DbContexts.Get<AppDbContext>();
 
-                var transaction = dbContext.Transactions.First(x => x.Id == transactionId);
+                var transaction = dbContext.Transactions.Find(transactionId);
                 dbContext.Entry(transaction).Reference(x => x.Account).Load();
                 dbContext.Entry(transaction).Reference(x => x.TransferTransaction).Load();
 
-                var account = dbContext.Accounts.First(x => x.Id == transactionId);
+                var account = dbContext.Accounts.Find(accountId);
 
                 transaction.Account.TotalBalance -= transaction.Amount;
                 account.TotalBalance += transaction.Amount;
@@ -233,7 +233,7 @@ namespace Earmark.Backend.Services
             {
                 var dbContext = dbContextScope.DbContexts.Get<AppDbContext>();
 
-                var transaction = dbContext.Transactions.First(x => x.Id == transactionId);
+                var transaction = dbContext.Transactions.Find(transactionId);
                 dbContext.Entry(transaction).Reference(x => x.TransferTransaction).Load();
 
                 if (transaction.TransferTransaction is not null)
@@ -244,7 +244,7 @@ namespace Earmark.Backend.Services
                 Payee payee = null;
                 if (payeeId is not null)
                 {
-                    payee = dbContext.Payees.First(x => x.Id == payeeId);
+                    payee = dbContext.Payees.Find(payeeId);
                     dbContext.Entry(payee).Reference(x => x.TransferAccount).Load();
                 }
 
@@ -278,7 +278,7 @@ namespace Earmark.Backend.Services
             {
                 var dbContext = dbContextScope.DbContexts.Get<AppDbContext>();
 
-                var transaction = dbContext.Transactions.First(x => x.Id == transactionId);
+                var transaction = dbContext.Transactions.Find(transactionId);
                 dbContext.Entry(transaction).Reference(x => x.Category).Load();
 
                 if (transaction.Category is not null)
@@ -290,7 +290,7 @@ namespace Earmark.Backend.Services
                 Category category = null;
                 if (categoryId is not null)
                 {
-                    category = dbContext.Categories.First(x => x.Id == categoryId);
+                    category = dbContext.Categories.Find(categoryId);
                     _budgetService.UpdateBalanceAmounts(
                         transaction.Date.Month, transaction.Date.Year, category.Id, transaction.Amount);
                 }

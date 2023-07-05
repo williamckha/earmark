@@ -107,7 +107,7 @@ namespace Earmark.Backend.Services
             {
                 var dbContext = dbContextScope.DbContexts.Get<AppDbContext>();
 
-                var categoryGroup = dbContext.CategoryGroups.First(x => x.Id == categoryGroupId);
+                var categoryGroup = dbContext.CategoryGroups.Find(categoryGroupId);
 
                 dbContext.CategoryGroups
                     .Where(x => x.Position > categoryGroup.Position)
@@ -125,7 +125,7 @@ namespace Earmark.Backend.Services
             {
                 var dbContext = dbContextScope.DbContexts.Get<AppDbContext>();
 
-                var category = dbContext.Categories.First(x => x.Id == categoryId);
+                var category = dbContext.Categories.Find(categoryId);
                 dbContext.Entry(category).Reference(x => x.Group).Load();
 
                 dbContext.Categories

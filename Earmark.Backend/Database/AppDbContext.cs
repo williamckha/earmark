@@ -28,7 +28,6 @@ namespace Earmark.Backend.Database
             var connectionStringBuilder = new SqliteConnectionStringBuilder();
             connectionStringBuilder.DataSource = "C:\\Users\\willi\\Desktop\\Budget.earmark";
             optionsBuilder.UseSqlite(connectionStringBuilder.ToString());
-            optionsBuilder.EnableSensitiveDataLogging();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

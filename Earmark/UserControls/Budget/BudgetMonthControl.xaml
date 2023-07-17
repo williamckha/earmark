@@ -130,7 +130,8 @@
                                    VerticalAlignment="Center"
                                    TextAlignment="Right"
                                    Text="{x:Bind conv:CurrencyFormatConverter.CurrencyIntegerToString(TotalActivity)}"
-                                   Foreground="{x:Bind local:BudgetMonthControl.GetCategoryActivityForegroundBrush(TotalActivity)}" />
+                                   Foreground="{x:Bind local:BudgetMonthControl.GetCategoryActivityForegroundBrush(TotalActivity)}"
+                                   Opacity="{x:Bind local:BudgetMonthControl.GetCategoryActivityOrBalanceOpacity(TotalActivity)}" />
 
                         <TextBlock Grid.Column="2"
                                    Margin="8 0"
@@ -138,7 +139,8 @@
                                    VerticalAlignment="Center"
                                    TextAlignment="Right"
                                    Text="{x:Bind conv:CurrencyFormatConverter.CurrencyIntegerToString(TotalBalance), Mode=OneWay}"
-                                   Foreground="{x:Bind local:BudgetMonthControl.GetCategoryBalanceForegroundBrush(TotalBalance), Mode=OneWay}" />
+                                   Foreground="{x:Bind local:BudgetMonthControl.GetCategoryBalanceForegroundBrush(TotalBalance), Mode=OneWay}"
+                                   Opacity="{x:Bind local:BudgetMonthControl.GetCategoryActivityOrBalanceOpacity(TotalBalance), Mode=OneWay}" />
 
                     </Grid>
 

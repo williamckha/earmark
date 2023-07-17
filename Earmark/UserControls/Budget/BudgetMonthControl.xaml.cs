@@ -40,5 +40,10 @@ namespace Earmark.UserControls.Budget
                 return App.Current.Resources["TextFillColorPrimaryBrush"] as SolidColorBrush;
             }
         }
+
+        public static double GetCategoryActivityOrBalanceOpacity(int value)
+        {
+            return (value == 0) ? 0.25 : 1;
+        }
     }
 }

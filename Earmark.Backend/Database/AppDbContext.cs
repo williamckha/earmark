@@ -26,7 +26,7 @@ namespace Earmark.Backend.Database
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             var connectionStringBuilder = new SqliteConnectionStringBuilder();
-            connectionStringBuilder.DataSource = "C:\\Users\\willi\\Desktop\\Budget.earmark";
+            connectionStringBuilder.DataSource = "Budget.earmark";
             optionsBuilder.UseSqlite(connectionStringBuilder.ToString());
         }
 

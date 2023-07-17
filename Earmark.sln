@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33723.286
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5}") = "Earmark (Package)", "Earmark (Package)\Earmark (Package).wapproj", "{97CE62CE-440F-4525-9376-8D06A583F708}"
+Project("{C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5}") = "Earmark.Package", "Earmark (Package)\Earmark.Package.wapproj", "{97CE62CE-440F-4525-9376-8D06A583F708}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Earmark", "Earmark\Earmark.csproj", "{5582985D-768A-4A08-95AC-143481F402B8}"
 EndProject

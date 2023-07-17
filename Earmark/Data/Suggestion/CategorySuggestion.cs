@@ -7,7 +7,7 @@ namespace Earmark.Data.Suggestion
     {
         private Category _category;
 
-        public Guid? Id => _category?.Id;
+        public int? Id => _category?.Id;
 
         public string Name => _category?.Name ?? string.Empty;
 

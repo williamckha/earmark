@@ -11,7 +11,7 @@ namespace Earmark.Data.Navigation
         [ObservableProperty]
         private int _totalBalance;
 
-        public Guid Id { get; }
+        public int Id { get; }
 
         public string Name { get; }
 
@@ -27,7 +27,7 @@ namespace Earmark.Data.Navigation
             Name = account.Name;
         }
 
-        private IEnumerable<Guid> GetAccountIdAsSingleItemEnumerable()
+        private IEnumerable<int> GetAccountIdAsSingleItemEnumerable()
         {
             yield return Id;
         }

@@ -32,17 +32,17 @@ namespace Earmark.ViewModels.Budget
         /// <summary>
         /// The unique ID that identifies the budget month.
         /// </summary>
-        public Guid BudgetMonthId { get; }
+        public int BudgetMonthId { get; }
 
         /// <summary>
         /// The unique ID that identifies the category.
         /// </summary>
-        public Guid CategoryId { get; }
+        public int CategoryId { get; }
 
         /// <summary>
         /// The unique ID that identifies the category group of the category.
         /// </summary>
-        public Guid CategoryGroupId { get; }
+        public int CategoryGroupId { get; }
 
         /// <summary>
         /// The month of the budget month.
@@ -78,7 +78,7 @@ namespace Earmark.ViewModels.Budget
         {
             base.OnActivated();
 
-            Messenger.Register<BudgetMonthCategoryViewModel, BudgetedAmountChangedMessage, Guid>(this, CategoryId, (r, m) =>
+            Messenger.Register<BudgetMonthCategoryViewModel, BudgetedAmountChangedMessage, int>(this, CategoryId, (r, m) =>
             {
                 r.TotalBalance = r._budgetService.GetTotalBalanceForMonthInCategory(r.BudgetMonthId, r.CategoryId);
             });

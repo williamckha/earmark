@@ -15,7 +15,8 @@ namespace Earmark.Backend.Migrations
                 name: "BudgetMonths",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
                     Month = table.Column<int>(type: "INTEGER", nullable: false),
                     Year = table.Column<int>(type: "INTEGER", nullable: false),
                     TotalUnbudgeted = table.Column<int>(type: "INTEGER", nullable: false)
@@ -29,7 +30,8 @@ namespace Earmark.Backend.Migrations
                 name: "CategoryGroups",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
                     Position = table.Column<int>(type: "INTEGER", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: true),
                     IsIncome = table.Column<bool>(type: "INTEGER", nullable: false)
@@ -43,7 +45,8 @@ namespace Earmark.Backend.Migrations
                 name: "Payees",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
@@ -55,11 +58,12 @@ namespace Earmark.Backend.Migrations
                 name: "Categories",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
                     Position = table.Column<int>(type: "INTEGER", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: true),
                     IsIncome = table.Column<bool>(type: "INTEGER", nullable: false),
-                    GroupId = table.Column<Guid>(type: "TEXT", nullable: false)
+                    GroupId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -76,7 +80,7 @@ namespace Earmark.Backend.Migrations
                 name: "Accounts",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: true),
                     TotalBalance = table.Column<int>(type: "INTEGER", nullable: false)
                 },
@@ -95,11 +99,12 @@ namespace Earmark.Backend.Migrations
                 name: "BalanceAmounts",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
                     Amount = table.Column<int>(type: "INTEGER", nullable: false),
                     RolloverAmount = table.Column<int>(type: "INTEGER", nullable: false),
-                    MonthId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    CategoryId = table.Column<Guid>(type: "TEXT", nullable: false)
+                    MonthId = table.Column<int>(type: "INTEGER", nullable: false),
+                    CategoryId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -122,10 +127,11 @@ namespace Earmark.Backend.Migrations
                 name: "BudgetedAmounts",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
                     Amount = table.Column<int>(type: "INTEGER", nullable: false),
-                    MonthId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    CategoryId = table.Column<Guid>(type: "TEXT", nullable: false)
+                    MonthId = table.Column<int>(type: "INTEGER", nullable: false),
+                    CategoryId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -148,14 +154,15 @@ namespace Earmark.Backend.Migrations
                 name: "Transactions",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
                     Date = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Memo = table.Column<string>(type: "TEXT", nullable: true),
                     Amount = table.Column<int>(type: "INTEGER", nullable: false),
-                    AccountId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    PayeeId = table.Column<Guid>(type: "TEXT", nullable: true),
-                    CategoryId = table.Column<Guid>(type: "TEXT", nullable: true),
-                    TransferTransactionId = table.Column<Guid>(type: "TEXT", nullable: true)
+                    AccountId = table.Column<int>(type: "INTEGER", nullable: false),
+                    PayeeId = table.Column<int>(type: "INTEGER", nullable: true),
+                    CategoryId = table.Column<int>(type: "INTEGER", nullable: true),
+                    TransferTransactionId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {

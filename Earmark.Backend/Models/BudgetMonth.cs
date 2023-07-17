@@ -8,7 +8,7 @@ namespace Earmark.Backend.Models
         /// <summary>
         /// The unique ID that identifies the budget month.
         /// </summary>
-        public Guid Id { get; set; }
+        public int Id { get; set; }
         
         /// <summary>
         /// The month of the budget month.

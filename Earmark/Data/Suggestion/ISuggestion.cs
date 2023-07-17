@@ -4,7 +4,7 @@ namespace Earmark.Data.Suggestion
 {
     public interface ISuggestion
     {
-        Guid? Id { get; }
+        int? Id { get; }
 
         string Name { get; }
 

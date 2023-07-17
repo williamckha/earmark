@@ -31,7 +31,7 @@ namespace Earmark.ViewModels.Account
         [ObservableProperty]
         private int _totalBalance;
 
-        public IEnumerable<Guid> AccountIds { get; private set; }
+        public IEnumerable<int> AccountIds { get; private set; }
 
         public bool IsMultipleAccounts => AccountIds.Count() > 1;
 
@@ -173,7 +173,7 @@ namespace Earmark.ViewModels.Account
         public void RemoveTransaction(TransactionViewModel transactionViewModel)
         {
             _accountService.RemoveTransaction(transactionViewModel.Id);
-            if (transactionViewModel.TransferTransactionId is Guid transferTransactionId)
+            if (transactionViewModel.TransferTransactionId is int transferTransactionId)
             {
                 _accountService.RemoveTransaction(transferTransactionId);
             }

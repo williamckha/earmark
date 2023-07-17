@@ -39,7 +39,6 @@ namespace Earmark.Backend.Services
 
                 var payee = new Payee()
                 {
-                    Id = Guid.NewGuid(),
                     Name = name
                 };
 
@@ -49,7 +48,7 @@ namespace Earmark.Backend.Services
             }
         }
 
-        public void RemovePayee(Guid payeeId)
+        public void RemovePayee(int payeeId)
         {
             using (var dbContextScope = _dbContextScopeFactory.Create())
             {

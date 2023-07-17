@@ -23,6 +23,6 @@ namespace Earmark.Backend.Services
         /// Removes the payee.
         /// </summary>
         /// <param name="payeeId">The ID of the payee to remove.</param>
-        void RemovePayee(Guid payeeId);
+        void RemovePayee(int payeeId);
     }
 }

@@ -18,7 +18,7 @@ namespace Earmark.ViewModels.Budget
         /// <summary>
         /// The ID which identifies the category group.
         /// </summary>
-        public Guid Id { get; }
+        public int Id { get; }
 
         /// <summary>
         /// The name of the category group.
@@ -62,7 +62,7 @@ namespace Earmark.ViewModels.Budget
         {
             base.OnActivated();
 
-            Messenger.Register<CategoryGroupViewModel, CategoryGroupViewModelRequestMessage, Guid>(this, Id, (r, m) => m.Reply(r));
+            Messenger.Register<CategoryGroupViewModel, CategoryGroupViewModelRequestMessage, int>(this, Id, (r, m) => m.Reply(r));
         }
 
         protected override void OnDeactivated()

@@ -28,7 +28,7 @@ namespace Earmark.Backend.Services
             }
         }
 
-        public int GetTotalBudgetedForMonthInCategory(Guid budgetMonthId, Guid categoryId)
+        public int GetTotalBudgetedForMonthInCategory(int budgetMonthId, int categoryId)
         {
             using (var dbContextScope = _dbContextScopeFactory.CreateReadOnly())
             {
@@ -38,7 +38,7 @@ namespace Earmark.Backend.Services
             }
         }
 
-        public int GetTotalBalanceForMonthInCategory(Guid budgetMonthId, Guid categoryId)
+        public int GetTotalBalanceForMonthInCategory(int budgetMonthId, int categoryId)
         {
             using (var dbContextScope = _dbContextScopeFactory.CreateReadOnly())
             {
@@ -48,7 +48,7 @@ namespace Earmark.Backend.Services
             }
         }
 
-        public int GetTotalOverspentForMonth(Guid budgetMonthId)
+        public int GetTotalOverspentForMonth(int budgetMonthId)
         {
             using (var dbContextScope = _dbContextScopeFactory.CreateReadOnly())
             {
@@ -62,7 +62,7 @@ namespace Earmark.Backend.Services
             }
         }
 
-        public int GetTotalActivityForMonthInCategory(int month, int year, Guid categoryId)
+        public int GetTotalActivityForMonthInCategory(int month, int year, int categoryId)
         {
             using (var dbContextScope = _dbContextScopeFactory.CreateReadOnly())
             {
@@ -106,13 +106,15 @@ namespace Earmark.Backend.Services
 
                 var budgetMonth = new BudgetMonth()
                 {
-                    Id = Guid.NewGuid(),
                     Month = month,
                     Year = year,
                     TotalUnbudgeted = 0
                 };
 
                 dbContext.BudgetMonths.Add(budgetMonth);
+                
+                // Get the temporary ID of the added budget month.
+                var budgetMonthId = dbContext.Entry(budgetMonth).Property(x => x.Id).CurrentValue;
 
                 // Try getting the budget month immediately behind the new budget month.
                 var previousBudgetMonth = dbContext.BudgetMonths
@@ -131,7 +133,7 @@ namespace Earmark.Backend.Services
                     // Rollover balance amounts from the previous month to the new month.
                     foreach (var previousBalanceAmount in previousBudgetMonth.BalanceAmounts)
                     {
-                        AddBalanceAmount(budgetMonth.Id, previousBalanceAmount.Category.Id, previousBalanceAmount.Amount);
+                        AddBalanceAmount(budgetMonthId, previousBalanceAmount.Category.Id, Math.Max(previousBalanceAmount.Amount, 0));
                     }
 
                     // Rollover total unbudgeted from the previous month to the new month.
@@ -139,10 +141,11 @@ namespace Earmark.Backend.Services
                 }
                 else
                 {
+                    // Add empty balance amounts in all categories to the new month.
                     var categoryIds = dbContext.Categories.Select(x => x.Id).ToList();
                     foreach (var categoryId in categoryIds)
                     {
-                        AddBalanceAmount(budgetMonth.Id, categoryId, 0);
+                        AddBalanceAmount(budgetMonthId, categoryId, 0);
                     }
                 }
 
@@ -151,7 +154,7 @@ namespace Earmark.Backend.Services
             }
         }
 
-        public BalanceAmount AddBalanceAmount(Guid budgetMonthId, Guid categoryId, int amount)
+        public BalanceAmount AddBalanceAmount(int budgetMonthId, int categoryId, int amount)
         {
             using (var dbContextScope = _dbContextScopeFactory.Create())
             {
@@ -162,8 +165,8 @@ namespace Earmark.Backend.Services
 
                 var balanceAmount = new BalanceAmount()
                 {
-                    Id = Guid.NewGuid(),
                     Amount = amount,
+                    RolloverAmount = amount,
                     Month = budgetMonth,
                     Category = category
                 };
@@ -174,7 +177,7 @@ namespace Earmark.Backend.Services
             }
         }
 
-        public BudgetedAmount SetBudgetedAmount(Guid budgetMonthId, Guid categoryId, int amount)
+        public BudgetedAmount SetBudgetedAmount(int budgetMonthId, int categoryId, int amount)
         {
             using (var dbContextScope = _dbContextScopeFactory.Create())
             {
@@ -195,7 +198,6 @@ namespace Earmark.Backend.Services
                 {
                     budgetedAmount = new BudgetedAmount()
                     {
-                        Id = Guid.NewGuid(),
                         Amount = amount,
                         Month = budgetMonth,
                         Category = dbContext.Categories.Find(categoryId)
@@ -210,8 +212,8 @@ namespace Earmark.Backend.Services
                 return budgetedAmount;
             }
         }
-
-        public void UpdateBalanceAmounts(int month, int year, Guid categoryId, int activity)
+        
+        public void UpdateBalanceAmounts(int month, int year, int categoryId, int activity)
         {
             if (month < 1 || month > 12) throw new ArgumentOutOfRangeException(nameof(month));
 
@@ -226,30 +228,32 @@ namespace Earmark.Backend.Services
                     AddBudgetMonth(month, year);
                 }
 
-                var balanceAmount = dbContext.BalanceAmounts.FirstOrDefault(x =>
-                    x.Category.Id == categoryId &&
-                    x.Month.Year == year &&
-                    x.Month.Month == month);
-
-                // This makes sure we don't rollover negative balances.
-                var rolledOverActivity = Math.Max(balanceAmount.Amount + activity, 0) - Math.Max(balanceAmount.Amount, 0);
-
-                balanceAmount.Amount += activity;
-
-                var balanceAmountIds = dbContext.BalanceAmounts
+                // Get all balance amounts on or after the specified month in the category.
+                var balanceAmounts = dbContext.BalanceAmounts
                     .Where(x => x.Category.Id == categoryId)
-                    .Where(x => (x.Month.Year == year && x.Month.Month > month) || (x.Month.Year > year))
-                    .Select(x => x.Id);
+                    .Where(x => (x.Month.Year == year && x.Month.Month >= month) || (x.Month.Year > year))
+                    .OrderBy(x => x.Month.Year)
+                    .ThenBy(x => x.Month.Month)
+                    .ToList();
 
-                dbContext.BalanceAmounts
-                    .Where(x => balanceAmountIds.Contains(x.Id))
-                    .ExecuteUpdate(setters => setters
-                        .SetProperty(
-                            x => x.Amount,
-                            x => x.Amount + Math.Max(rolledOverActivity, -x.RolloverAmount))
-                        .SetProperty(
-                            x => x.RolloverAmount,
-                            x => x.RolloverAmount + Math.Max(rolledOverActivity, -x.RolloverAmount)));
+                balanceAmounts.First().Amount += activity;
+
+                // Keep track of the balance amount before the current balance amount while looping.
+                var lastBalanceAmount = balanceAmounts.First();
+
+                foreach (var balanceAmount in balanceAmounts.Skip(1))
+                {
+                    // Find how much was added/subtracted from the rollover for this balance amount.
+                    var movement = balanceAmount.Amount - balanceAmount.RolloverAmount;
+
+                    // Only positive balances are rolled over.
+                    var rollover = Math.Max(lastBalanceAmount.Amount, 0);
+
+                    balanceAmount.RolloverAmount = rollover;
+                    balanceAmount.Amount = movement + rollover;
+
+                    lastBalanceAmount = balanceAmount;
+                }
 
                 dbContextScope.SaveChanges();
             }

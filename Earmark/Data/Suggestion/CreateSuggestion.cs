@@ -5,7 +5,7 @@ namespace Earmark.Data.Suggestion
 {
     public class CreateSuggestion : ISuggestion
     {
-        public Guid? Id => null;
+        public int? Id => null;
 
         public string Name => string.Format("CreateSuggestionText".GetLocalizedResource(), QueryableName);
 

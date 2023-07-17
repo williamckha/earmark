@@ -53,7 +53,6 @@ namespace Earmark.Backend.Services
 
                 var categoryGroup = new CategoryGroup()
                 {
-                    Id = Guid.NewGuid(),
                     Position = dbContext.Categories.Count(),
                     Name = name,
                     IsIncome = false,
@@ -66,7 +65,7 @@ namespace Earmark.Backend.Services
             }
         }
 
-        public Category AddCategory(Guid categoryGroupId, string name)
+        public Category AddCategory(int categoryGroupId, string name)
         {
             using (var dbContextScope = _dbContextScopeFactory.Create())
             {
@@ -81,7 +80,6 @@ namespace Earmark.Backend.Services
 
                 var category = new Category()
                 {
-                    Id = Guid.NewGuid(),
                     Position = categoryGroup.Categories.Count(),
                     Name = name,
                     IsIncome = false,
@@ -90,10 +88,13 @@ namespace Earmark.Backend.Services
 
                 dbContext.Categories.Add(category);
 
+                // Get the temporary ID of the added category.
+                var categoryId = dbContext.Entry(category).Property(x => x.Id).CurrentValue;
+
                 var budgetMonthIds = dbContext.BudgetMonths.Select(x => x.Id).ToList();
                 foreach (var budgetMonthId in budgetMonthIds)
                 {
-                    _budgetService.AddBalanceAmount(budgetMonthId, category.Id, 0);
+                    _budgetService.AddBalanceAmount(budgetMonthId, categoryId, 0);
                 }
 
                 dbContextScope.SaveChanges();
@@ -101,7 +102,7 @@ namespace Earmark.Backend.Services
             }
         }
 
-        public void RemoveCategoryGroup(Guid categoryGroupId)
+        public void RemoveCategoryGroup(int categoryGroupId)
         {
             using (var dbContextScope = _dbContextScopeFactory.Create())
             {
@@ -119,7 +120,7 @@ namespace Earmark.Backend.Services
             }
         }
 
-        public void RemoveCategory(Guid categoryId)
+        public void RemoveCategory(int categoryId)
         {
             using (var dbContextScope = _dbContextScopeFactory.Create())
             {

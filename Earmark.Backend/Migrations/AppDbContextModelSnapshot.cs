@@ -19,8 +19,8 @@ namespace Earmark.Backend.Migrations
 
             modelBuilder.Entity("Earmark.Backend.Models.Account", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Id")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
@@ -35,18 +35,18 @@ namespace Earmark.Backend.Migrations
 
             modelBuilder.Entity("Earmark.Backend.Models.BalanceAmount", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Amount")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("CategoryId")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("MonthId")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("MonthId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("RolloverAmount")
                         .HasColumnType("INTEGER");
@@ -62,9 +62,9 @@ namespace Earmark.Backend.Migrations
 
             modelBuilder.Entity("Earmark.Backend.Models.BudgetMonth", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Month")
                         .HasColumnType("INTEGER");
@@ -82,18 +82,18 @@ namespace Earmark.Backend.Migrations
 
             modelBuilder.Entity("Earmark.Backend.Models.BudgetedAmount", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Amount")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("CategoryId")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("MonthId")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("MonthId")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -106,12 +106,12 @@ namespace Earmark.Backend.Migrations
 
             modelBuilder.Entity("Earmark.Backend.Models.Category", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("GroupId")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("GroupId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsIncome")
                         .HasColumnType("INTEGER");
@@ -131,9 +131,9 @@ namespace Earmark.Backend.Migrations
 
             modelBuilder.Entity("Earmark.Backend.Models.CategoryGroup", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsIncome")
                         .HasColumnType("INTEGER");
@@ -151,9 +151,9 @@ namespace Earmark.Backend.Migrations
 
             modelBuilder.Entity("Earmark.Backend.Models.Payee", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
@@ -165,18 +165,18 @@ namespace Earmark.Backend.Migrations
 
             modelBuilder.Entity("Earmark.Backend.Models.Transaction", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("AccountId")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("AccountId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Amount")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid?>("CategoryId")
-                        .HasColumnType("TEXT");
+                    b.Property<int?>("CategoryId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("TEXT");
@@ -184,11 +184,11 @@ namespace Earmark.Backend.Migrations
                     b.Property<string>("Memo")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("PayeeId")
-                        .HasColumnType("TEXT");
+                    b.Property<int?>("PayeeId")
+                        .HasColumnType("INTEGER");
 
-                    b.Property<Guid?>("TransferTransactionId")
-                        .HasColumnType("TEXT");
+                    b.Property<int?>("TransferTransactionId")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 

@@ -12,12 +12,12 @@ namespace Earmark.ViewModels.Budget
         /// <summary>
         /// The unique ID that identifies the category.
         /// </summary>
-        public Guid Id { get; }
+        public int Id { get; }
         
         /// <summary>
         /// The unique ID that identifies the category group of the category.
         /// </summary>
-        public Guid GroupId { get; }
+        public int GroupId { get; }
 
         /// <summary>
         /// The name of the category.

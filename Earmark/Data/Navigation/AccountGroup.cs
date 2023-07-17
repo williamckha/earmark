@@ -7,9 +7,9 @@ namespace Earmark.Data.Navigation
     {
         public string Name { get; }
 
-        public IEnumerable<Guid> AccountIds { get; }
+        public IEnumerable<int> AccountIds { get; }
 
-        public AccountGroup(string name, IEnumerable<Guid> accountIds)
+        public AccountGroup(string name, IEnumerable<int> accountIds)
         {
             Name = name;
             AccountIds = accountIds;

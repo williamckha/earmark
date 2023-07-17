@@ -7,7 +7,7 @@ namespace Earmark.Data.Suggestion
     {
         private Payee _payee;
 
-        public Guid? Id => _payee?.Id;
+        public int? Id => _payee?.Id;
 
         public string Name => _payee?.Name ?? string.Empty;
 

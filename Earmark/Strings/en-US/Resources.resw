@@ -117,11 +117,44 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AccountAlreadyExistsErrorMessage" xml:space="preserve">
+    <value>Account already exists.</value>
+  </data>
   <data name="AccountGroupName_AllAccounts" xml:space="preserve">
     <value>All accounts</value>
   </data>
+  <data name="AccountNameIsEmptyErrorMessage" xml:space="preserve">
+    <value>Account name is empty.</value>
+  </data>
   <data name="AccountSuggestionBox.PlaceholderText" xml:space="preserve">
     <value>Account</value>
+  </data>
+  <data name="AddAccountButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Add account</value>
+  </data>
+  <data name="AddAccountButton_TextBlock.Text" xml:space="preserve">
+    <value>Add account</value>
+  </data>
+  <data name="AddAccountDialog.CloseButtonText" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="AddAccountDialog.PrimaryButtonText" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="AddAccountDialog.Title" xml:space="preserve">
+    <value>Add account</value>
+  </data>
+  <data name="AddAccountDialog_AccountNameTextBox.Header" xml:space="preserve">
+    <value>Account name</value>
+  </data>
+  <data name="AddAccountDialog_AccountNameTextBox.PlaceholderText" xml:space="preserve">
+    <value>e.g. "Chequing" or "Savings"</value>
+  </data>
+  <data name="AddAccountDialog_IsOffBudgetCheckBox.Content" xml:space="preserve">
+    <value>Off budget</value>
+  </data>
+  <data name="AddAccountDialog_StartingBalanceNumberBox.Header" xml:space="preserve">
+    <value>Starting balance</value>
   </data>
   <data name="AddCategoryButton.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
     <value>Add category</value>
@@ -183,11 +216,17 @@
   <data name="NavigationItem_Accounts" xml:space="preserve">
     <value>Accounts</value>
   </data>
+  <data name="NavigationItem_AddAccount" xml:space="preserve">
+    <value>Add account</value>
+  </data>
   <data name="NavigationItem_Budget" xml:space="preserve">
     <value>Budget</value>
   </data>
   <data name="NavigationItem_Reports" xml:space="preserve">
     <value>Reports</value>
+  </data>
+  <data name="NavigationItem_Settings" xml:space="preserve">
+    <value>Settings</value>
   </data>
   <data name="OverbudgetedThisMonthLabel" xml:space="preserve">
     <value>overbudgeted</value>
@@ -203,6 +242,9 @@
   </data>
   <data name="QuickBudgetMenuFlyoutItem_ZeroAllBudgetedAmounts.Text" xml:space="preserve">
     <value>Zero all budgeted amounts</value>
+  </data>
+  <data name="StartingBalanceTransactionMemo" xml:space="preserve">
+    <value>Starting balance</value>
   </data>
   <data name="TitleBarTextBlock.Text" xml:space="preserve">
     <value>Earmark</value>

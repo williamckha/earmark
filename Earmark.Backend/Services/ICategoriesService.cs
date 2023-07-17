@@ -31,18 +31,18 @@ namespace Earmark.Backend.Services
         /// <param name="categoryGroupId">The ID of the category group to put the category in.</param>
         /// <param name="name">The name of the category.</param>
         /// <returns>The added category.</returns>
-        Category AddCategory(Guid categoryGroupId, string name);
+        Category AddCategory(int categoryGroupId, string name);
 
         /// <summary>
         /// Removes the category group and all of the categories in the group.
         /// </summary>
         /// <param name="categoryGroupId">The ID of the category group to remove.</param>
-        void RemoveCategoryGroup(Guid categoryGroupId);
+        void RemoveCategoryGroup(int categoryGroupId);
 
         /// <summary>
         /// Removes the category.
         /// </summary>
         /// <param name="categoryId">The ID of the category to remove.</param>
-        void RemoveCategory(Guid categoryId);
+        void RemoveCategory(int categoryId);
     }
 }

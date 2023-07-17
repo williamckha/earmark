@@ -15,9 +15,9 @@ namespace Earmark.Data.Messages
 
     public class CategoryGroupRemovedMessage
     {
-        public Guid CategoryGroupId { get; }
+        public int CategoryGroupId { get; }
 
-        public CategoryGroupRemovedMessage(Guid categoryGroupId)
+        public CategoryGroupRemovedMessage(int categoryGroupId)
         {
             CategoryGroupId = categoryGroupId;
         }
@@ -35,9 +35,9 @@ namespace Earmark.Data.Messages
 
     public class CategoryRemovedMessage
     {
-        public Guid CategoryId { get; }
+        public int CategoryId { get; }
 
-        public CategoryRemovedMessage(Guid categoryId)
+        public CategoryRemovedMessage(int categoryId)
         {
             CategoryId = categoryId;
         }

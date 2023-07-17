@@ -67,7 +67,7 @@ namespace Earmark.ViewModels.Budget
         /// <summary>
         /// The unique ID that identifies the budget month.
         /// </summary>
-        public Guid Id { get; }
+        public int Id { get; }
 
         /// <summary>
         /// The month of the budget month.

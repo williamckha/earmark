@@ -15,6 +15,7 @@
     <None Remove="UserControls\Budget\BudgetCategoriesControl.xaml" />
     <None Remove="UserControls\Budget\BudgetMonthControl.xaml" />
     <None Remove="UserControls\Budget\BudgetMonthHeader.xaml" />
+    <None Remove="UserControls\Dialogs\AddAccountDialog.xaml" />
     <None Remove="UserControls\EditableNumberBlock.xaml" />
     <None Remove="UserControls\EditableTextBlock.xaml" />
     <None Remove="UserControls\SuggestionBox.xaml" />
@@ -115,6 +116,12 @@
 
   <ItemGroup>
     <Page Update="UserControls\Account\TransactionTable.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="UserControls\Dialogs\AddAccountDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>

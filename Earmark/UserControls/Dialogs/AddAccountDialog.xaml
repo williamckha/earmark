@@ -1,0 +1,50 @@
+<ContentDialog x:Class="Earmark.UserControls.Dialogs.AddAccountDialog"
+               xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+               xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+               xmlns:local="using:Earmark.UserControls.Dialogs"
+               xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+               xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+               xmlns:aktoolkit="using:AK.Toolkit.WinUI3"
+               xmlns:conv="using:Earmark.Converters"
+               x:Uid="AddAccountDialog"
+               Style="{ThemeResource DefaultContentDialogStyle}"
+               DefaultButton="Primary"
+               PrimaryButtonClick="ContentDialog_PrimaryButtonClick"
+               mc:Ignorable="d">
+
+    <ContentDialog.Resources>
+        <conv:CurrencyIntegerToDoubleConverter x:Key="CurrencyIntegerToDoubleConverter" />
+    </ContentDialog.Resources>
+
+    <StackPanel Orientation="Vertical">
+
+        <StackPanel Orientation="Vertical"
+                    Spacing="16"
+                    Margin="0 8 0 0">
+
+            <TextBox x:Name="AccountNameTextBox"
+                     x:Uid="AddAccountDialog_AccountNameTextBox" />
+
+            <aktoolkit:NumberBoxEx x:Name="StartingBalanceNumberBox"
+                                   x:Uid="AddAccountDialog_StartingBalanceNumberBox"
+                                   IsDeleteButtonVisible="False"
+                                   AcceptsExpression="True"
+                                   NumberHorizontalAlignment="Left"
+                                   NumberFormatter="{x:Bind conv:CurrencyFormatConverter.Formatter}"
+                                   Value="{x:Bind StartingBalance, Mode=TwoWay, Converter={StaticResource CurrencyIntegerToDoubleConverter}}" />
+
+            <CheckBox x:Name="IsOffBudgetCheckBox"
+                      x:Uid="AddAccountDialog_IsOffBudgetCheckBox" />
+
+        </StackPanel>
+
+        <InfoBar x:Name="ErrorInfoBar"
+                 Margin="0 8 0 0"
+                 Severity="Warning"
+                 IsClosable="False"
+                 IsOpen="True"
+                 Visibility="Collapsed" />
+
+    </StackPanel>
+
+</ContentDialog>

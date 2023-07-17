@@ -36,7 +36,7 @@ namespace Earmark.ViewModels.Budget
         /// <summary>
         /// The unique ID that identifies the category group.
         /// </summary>
-        public Guid CategoryGroupId { get; }
+        public int CategoryGroupId { get; }
 
         /// <summary>
         /// The categories contained in the category group.
@@ -69,17 +69,17 @@ namespace Earmark.ViewModels.Budget
         {
             base.OnActivated();
 
-            Messenger.Register<BudgetMonthCategoryGroupViewModel, BudgetedAmountChangedMessage, Guid>(this, CategoryGroupId, (r, m) =>
+            Messenger.Register<BudgetMonthCategoryGroupViewModel, BudgetedAmountChangedMessage, int>(this, CategoryGroupId, (r, m) =>
             {
                 r.UpdateCalculatedProperties();
             });
 
-            Messenger.Register<BudgetMonthCategoryGroupViewModel, CategoryAddedMessage, Guid>(this, CategoryGroupId, (r, m) =>
+            Messenger.Register<BudgetMonthCategoryGroupViewModel, CategoryAddedMessage, int>(this, CategoryGroupId, (r, m) =>
             {
                 r.Categories.Add(new BudgetMonthCategoryViewModel(r._budgetService, r._budgetMonth, m.Category));
             });
 
-            Messenger.Register<BudgetMonthCategoryGroupViewModel, CategoryRemovedMessage, Guid>(this, CategoryGroupId, (r, m) =>
+            Messenger.Register<BudgetMonthCategoryGroupViewModel, CategoryRemovedMessage, int>(this, CategoryGroupId, (r, m) =>
             {
                 var categoryViewModel = r.Categories.First(x => x.CategoryId == m.CategoryId);
 

@@ -33,7 +33,7 @@ namespace Earmark.Backend.Services
             }
         }
         
-        public IEnumerable<Transaction> GetTransactions(IEnumerable<Guid> accountIds)
+        public IEnumerable<Transaction> GetTransactions(IEnumerable<int> accountIds)
         {
             using (var dbContextScope = _dbContextScopeFactory.CreateReadOnly())
             {
@@ -49,7 +49,7 @@ namespace Earmark.Backend.Services
             }
         }
 
-        public int GetTotalBalanceForAccounts(IEnumerable<Guid> accountIds)
+        public int GetTotalBalanceForAccounts(IEnumerable<int> accountIds)
         {
             using (var dbContextScope = _dbContextScopeFactory.CreateReadOnly())
             {
@@ -71,14 +71,12 @@ namespace Earmark.Backend.Services
 
                 var account = new Account()
                 {
-                    Id = Guid.NewGuid(),
                     Name = name,
                     TotalBalance = 0
                 };
 
                 var transferPayee = new Payee()
                 {
-                    Id = Guid.NewGuid(),
                     Name = name
                 };
                 account.TransferPayee = transferPayee;
@@ -89,7 +87,7 @@ namespace Earmark.Backend.Services
             }
         }
 
-        public Transaction AddTransaction(Guid accountId, DateTime date, int amount)
+        public Transaction AddTransaction(int accountId, DateTime date, int amount)
         {
             using (var dbContextScope = _dbContextScopeFactory.Create())
             {
@@ -99,7 +97,6 @@ namespace Earmark.Backend.Services
 
                 var transaction = new Transaction()
                 {
-                    Id = Guid.NewGuid(),
                     Date = date,
                     Memo = string.Empty,
                     Amount = amount,
@@ -114,7 +111,7 @@ namespace Earmark.Backend.Services
             }
         }
 
-        public Transaction SetDateForTransaction(Guid transactionId, DateTime date)
+        public Transaction SetDateForTransaction(int transactionId, DateTime date)
         {
             using (var dbContextScope = _dbContextScopeFactory.Create())
             {
@@ -145,7 +142,7 @@ namespace Earmark.Backend.Services
             }
         }
 
-        public Transaction SetMemoForTransaction(Guid transactionId, string memo)
+        public Transaction SetMemoForTransaction(int transactionId, string memo)
         {
             using (var dbContextScope = _dbContextScopeFactory.Create())
             {
@@ -165,7 +162,7 @@ namespace Earmark.Backend.Services
             }
         }
 
-        public Transaction SetAmountForTransaction(Guid transactionId, int amount)
+        public Transaction SetAmountForTransaction(int transactionId, int amount)
         {
             using (var dbContextScope = _dbContextScopeFactory.Create())
             {
@@ -199,7 +196,7 @@ namespace Earmark.Backend.Services
             }
         }
 
-        public Transaction SetAccountForTransaction(Guid transactionId, Guid accountId)
+        public Transaction SetAccountForTransaction(int transactionId, int accountId)
         {
             using (var dbContextScope = _dbContextScopeFactory.Create())
             {
@@ -227,7 +224,7 @@ namespace Earmark.Backend.Services
             }
         }
 
-        public Transaction SetPayeeForTransaction(Guid transactionId, Guid? payeeId)
+        public Transaction SetPayeeForTransaction(int transactionId, int? payeeId)
         {
             using (var dbContextScope = _dbContextScopeFactory.Create())
             {
@@ -272,7 +269,7 @@ namespace Earmark.Backend.Services
             }
         }
 
-        public Transaction SetCategoryForTransaction(Guid transactionId, Guid? categoryId)
+        public Transaction SetCategoryForTransaction(int transactionId, int? categoryId)
         {
             using (var dbContextScope = _dbContextScopeFactory.Create())
             {
@@ -302,7 +299,7 @@ namespace Earmark.Backend.Services
             }
         }
 
-        public void RemoveAccount(Guid accountId)
+        public void RemoveAccount(int accountId)
         {
             using (var dbContextScope = _dbContextScopeFactory.Create())
             {
@@ -321,7 +318,7 @@ namespace Earmark.Backend.Services
             }
         }
 
-        public void RemoveTransaction(Guid transactionId)
+        public void RemoveTransaction(int transactionId)
         {
             using (var dbContextScope = _dbContextScopeFactory.Create())
             {

@@ -6,7 +6,7 @@ namespace Earmark.Data.Suggestion
     {
         private Backend.Models.Account _account;
 
-        public Guid? Id => _account.Id;
+        public int? Id => _account.Id;
 
         public string Name => _account.Name;
 

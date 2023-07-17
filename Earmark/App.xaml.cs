@@ -79,6 +79,7 @@ namespace Earmark
                 .AddTransient<ReportsViewModel>()
                 .AddTransient<AccountViewModel>()
 
+                .AddSingleton<IDialogService, DialogService>()
                 .AddSingleton<INavigationService, NavigationService>()
 
                 .AddSingleton<IDbContextScopeFactory, DbContextScopeFactory>()

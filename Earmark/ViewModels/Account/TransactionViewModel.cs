@@ -34,9 +34,9 @@ namespace Earmark.ViewModels.Account
         [ObservableProperty]
         private CategorySuggestion _chosenCategorySuggestion;
 
-        public Guid Id { get; }
+        public int Id { get; }
 
-        public Guid? TransferTransactionId { get; private set; }
+        public int? TransferTransactionId { get; private set; }
 
         public bool IsTransfer => TransferTransactionId is not null;
 
@@ -70,7 +70,7 @@ namespace Earmark.ViewModels.Account
         {
             base.OnActivated();
 
-            Messenger.Register<TransactionViewModel, TransactionViewModelRequestMessage, Guid>(this, Id, (r, m) => m.Reply(r));
+            Messenger.Register<TransactionViewModel, TransactionViewModelRequestMessage, int>(this, Id, (r, m) => m.Reply(r));
         }
 
         partial void OnDateChanged(DateTime oldValue, DateTime newValue)
@@ -126,7 +126,7 @@ namespace Earmark.ViewModels.Account
         {
             if (oldValue.Id != newValue.Id)
             {
-                _accountService.SetAccountForTransaction(Id, (Guid)newValue.Id);
+                _accountService.SetAccountForTransaction(Id, (int)newValue.Id);
 
                 var transferTransactionViewModel = GetTransferTransactionViewModel();
                 if (transferTransactionViewModel is not null)
@@ -182,7 +182,7 @@ namespace Earmark.ViewModels.Account
 
         public TransactionViewModel GetTransferTransactionViewModel()
         {
-            if (TransferTransactionId is Guid transferTransactionId)
+            if (TransferTransactionId is int transferTransactionId)
             {
                 return Messenger.Send(new TransactionViewModelRequestMessage(), transferTransactionId);
             }

@@ -8,7 +8,7 @@ namespace Earmark.Backend.Models
         /// <summary>
         /// The unique ID that identifies the transaction.
         /// </summary>
-        public Guid Id { get; set; }
+        public int Id { get; set; }
 
         /// <summary>
         /// The date of the transaction.

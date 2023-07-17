@@ -8,6 +8,7 @@
         xmlns:helpers="using:Earmark.Helpers.TemplateSelectors"
         xmlns:conv="using:Earmark.Converters"
         xmlns:nav="using:Earmark.Data.Navigation"
+        x:Name="MainWindowElement"
         mc:Ignorable="d">
 
     <Window.SystemBackdrop>
@@ -51,12 +52,13 @@
         <NavigationView x:Name="NavigationView"
                         IsBackEnabled="False"
                         IsBackButtonVisible="Collapsed"
-                        IsSettingsVisible="True"
+                        IsSettingsVisible="False"
                         IsPaneOpen="True"
                         PaneDisplayMode="Left"
                         OpenPaneLength="300"
                         Canvas.ZIndex="0"
                         MenuItemsSource="{x:Bind ViewModel.NavigationItems, Mode=OneWay}"
+                        FooterMenuItemsSource="{x:Bind ViewModel.NavigationFooterItems}"
                         SelectedItem="{x:Bind ViewModel.SelectedNavigationItem, Mode=TwoWay}">
 
             <NavigationView.Resources>
@@ -122,6 +124,30 @@
                                                         AccountGroupTemplate="{StaticResource NavigationItemAccountGroupTemplate}"
                                                         AccountTemplate="{StaticResource NavigationItemAccountTemplate}" />
             </NavigationView.MenuItemTemplateSelector>
+
+            <NavigationView.PaneFooter>
+                <Grid Padding="4 0">
+                    <Button x:Uid="AddAccountButton"
+                            Style="{ThemeResource DateTimePickerFlyoutButtonStyle}"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Left"
+                            VerticalContentAlignment="Center"
+                            Command="{x:Bind ViewModel.OpenAddAccountDialogCommand}"
+                            Padding="12 6"
+                            Height="36">
+                        <StackPanel Orientation="Horizontal">
+                            <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                      FontSize="17"
+                                      Margin="0 0 15 0"
+                                      Glyph="&#xECC8;"
+                                      VerticalAlignment="Center" />
+                            <TextBlock x:Uid="AddAccountButton_TextBlock"
+                                       Margin="0 0 0 2"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </NavigationView.PaneFooter>
 
             <Frame x:Name="NavigationViewFrame"
                    x:FieldModifier="public" />

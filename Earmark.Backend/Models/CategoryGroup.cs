@@ -8,7 +8,7 @@ namespace Earmark.Backend.Models
         /// <summary>
         /// The unique ID that identifies the category group.
         /// </summary>
-        public Guid Id { get; set; }
+        public int Id { get; set; }
 
         /// <summary>
         /// The position of the category group in the user-defined ordering of groups.

@@ -13,6 +13,12 @@ namespace Earmark.Backend.Services
         IEnumerable<Account> GetAccounts();
 
         /// <summary>
+        /// Gets all transactions in the database.
+        /// </summary>
+        /// <returns>All the transactions in the database.</returns>
+        IEnumerable<Transaction> GetTransactions();
+
+        /// <summary>
         /// Gets all transactions in the database that are under the specified accounts.
         /// </summary>
         /// <param name="accountIds">The IDs of the accounts to find transactions under.</param>

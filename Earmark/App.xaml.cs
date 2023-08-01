@@ -83,7 +83,6 @@ namespace Earmark
                 .AddSingleton<INavigationService, NavigationService>()
 
                 .AddSingleton<IDbContextScopeFactory, DbContextScopeFactory>()
-
                 .AddSingleton<IAccountService, AccountService>()
                 .AddSingleton<IBudgetService, BudgetService>()
                 .AddSingleton<ICategoriesService, CategoriesService>()

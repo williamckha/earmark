@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Security.Principal;
 
 namespace Earmark.Backend.Services
 {
@@ -32,7 +33,22 @@ namespace Earmark.Backend.Services
                     .ToList();
             }
         }
-        
+
+        public IEnumerable<Transaction> GetTransactions()
+        {
+            using (var dbContextScope = _dbContextScopeFactory.CreateReadOnly())
+            {
+                return dbContextScope.DbContexts.Get<AppDbContext>().Transactions
+                    .Include(x => x.Account)
+                    .Include(x => x.Payee)
+                    .Include(x => x.Category)
+                    .Include(x => x.TransferTransaction)
+                    .AsNoTracking()
+                    .AsSplitQuery()
+                    .ToList();
+            }
+        }
+
         public IEnumerable<Transaction> GetTransactions(IEnumerable<int> accountIds)
         {
             using (var dbContextScope = _dbContextScopeFactory.CreateReadOnly())
@@ -95,6 +111,9 @@ namespace Earmark.Backend.Services
 
                 var account = dbContext.Accounts.Find(accountId);
 
+                if (account is null)
+                    throw new ArgumentException("No account with the specified ID was found.");
+
                 var transaction = new Transaction()
                 {
                     Date = date,
@@ -118,6 +137,10 @@ namespace Earmark.Backend.Services
                 var dbContext = dbContextScope.DbContexts.Get<AppDbContext>();
 
                 var transaction = dbContext.Transactions.Find(transactionId);
+
+                if (transaction is null)
+                    throw new ArgumentException("No transaction with the specified ID was found.");
+
                 dbContext.Entry(transaction).Reference(x => x.Category).Load();
                 dbContext.Entry(transaction).Reference(x => x.TransferTransaction).Load();
 
@@ -149,6 +172,10 @@ namespace Earmark.Backend.Services
                 var dbContext = dbContextScope.DbContexts.Get<AppDbContext>();
 
                 var transaction = dbContext.Transactions.Find(transactionId);
+
+                if (transaction is null)
+                    throw new ArgumentException("No transaction with the specified ID was found.");
+
                 dbContext.Entry(transaction).Reference(x => x.TransferTransaction).Load();
 
                 transaction.Memo = memo;
@@ -169,6 +196,10 @@ namespace Earmark.Backend.Services
                 var dbContext = dbContextScope.DbContexts.Get<AppDbContext>();
 
                 var transaction = dbContext.Transactions.Find(transactionId);
+
+                if (transaction is null)
+                    throw new ArgumentException("No transaction with the specified ID was found.");
+
                 dbContext.Entry(transaction).Reference(x => x.Account).Load();
                 dbContext.Entry(transaction).Reference(x => x.Category).Load();
                 dbContext.Entry(transaction).Reference(x => x.TransferTransaction).Load();
@@ -203,10 +234,17 @@ namespace Earmark.Backend.Services
                 var dbContext = dbContextScope.DbContexts.Get<AppDbContext>();
 
                 var transaction = dbContext.Transactions.Find(transactionId);
+                
+                if (transaction is null)
+                    throw new ArgumentException("No transaction with the specified ID was found.");
+
                 dbContext.Entry(transaction).Reference(x => x.Account).Load();
                 dbContext.Entry(transaction).Reference(x => x.TransferTransaction).Load();
 
                 var account = dbContext.Accounts.Find(accountId);
+
+                if (account is null)
+                    throw new ArgumentException("No account with the specified ID was found.");
 
                 transaction.Account.TotalBalance -= transaction.Amount;
                 account.TotalBalance += transaction.Amount;
@@ -231,6 +269,10 @@ namespace Earmark.Backend.Services
                 var dbContext = dbContextScope.DbContexts.Get<AppDbContext>();
 
                 var transaction = dbContext.Transactions.Find(transactionId);
+
+                if (transaction is null)
+                    throw new ArgumentException("No transaction with the specified ID was found.");
+
                 dbContext.Entry(transaction).Reference(x => x.TransferTransaction).Load();
 
                 if (transaction.TransferTransaction is not null)
@@ -242,6 +284,10 @@ namespace Earmark.Backend.Services
                 if (payeeId is not null)
                 {
                     payee = dbContext.Payees.Find(payeeId);
+
+                    if (payee is null)
+                        throw new ArgumentException("No payee with the specified ID was found.");
+
                     dbContext.Entry(payee).Reference(x => x.TransferAccount).Load();
                 }
 
@@ -276,6 +322,10 @@ namespace Earmark.Backend.Services
                 var dbContext = dbContextScope.DbContexts.Get<AppDbContext>();
 
                 var transaction = dbContext.Transactions.Find(transactionId);
+
+                if (transaction is null)
+                    throw new ArgumentException("No transaction with the specified ID was found.");
+
                 dbContext.Entry(transaction).Reference(x => x.Category).Load();
 
                 if (transaction.Category is not null)
@@ -288,6 +338,10 @@ namespace Earmark.Backend.Services
                 if (categoryId is not null)
                 {
                     category = dbContext.Categories.Find(categoryId);
+
+                    if (category is null)
+                        throw new ArgumentException("No category with the specified ID was found.");
+
                     _budgetService.UpdateBalanceAmounts(
                         transaction.Date.Month, transaction.Date.Year, category.Id, transaction.Amount);
                 }
@@ -309,7 +363,10 @@ namespace Earmark.Backend.Services
                     .Include(x => x.Transactions)
                     .ThenInclude(x => x.TransferTransaction)
                     .Include(x => x.TransferPayee)
-                    .First(x => x.Id == accountId);
+                    .FirstOrDefault(x => x.Id == accountId);
+
+                if (account is null)
+                    throw new ArgumentException("No account with the specified ID was found.");
 
                 account.Transactions.ForEach(x => RemoveTransaction(x.Id));
                 dbContext.Payees.Remove(account.TransferPayee);
@@ -325,6 +382,10 @@ namespace Earmark.Backend.Services
                 var dbContext = dbContextScope.DbContexts.Get<AppDbContext>();
 
                 var transaction = dbContext.Transactions.Find(transactionId);
+
+                if (transaction is null)
+                    throw new ArgumentException("No transaction with the specified ID was found.");
+
                 dbContext.Entry(transaction).Reference(x => x.Account).Load();
                 dbContext.Entry(transaction).Reference(x => x.Category).Load();
                 dbContext.Entry(transaction).Reference(x => x.TransferTransaction).Load();

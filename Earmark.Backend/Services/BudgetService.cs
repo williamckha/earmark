@@ -3,6 +3,7 @@ using Earmark.Backend.Models;
 using EntityFramework.DbContextScope.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Earmark.Backend.Services
@@ -14,6 +15,16 @@ namespace Earmark.Backend.Services
         public BudgetService(IDbContextScopeFactory dbContextScopeFactory)
         {
             _dbContextScopeFactory = dbContextScopeFactory;
+        }
+
+        public IEnumerable<BudgetMonth> GetBudgetMonths()
+        {
+            using (var dbContextScope = _dbContextScopeFactory.CreateReadOnly())
+            {
+                return dbContextScope.DbContexts.Get<AppDbContext>().BudgetMonths
+                    .AsNoTracking()
+                    .ToList();
+            }
         }
 
         public BudgetMonth GetBudgetMonth(int month, int year)

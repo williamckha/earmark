@@ -1,10 +1,17 @@
 ﻿using Earmark.Backend.Models;
 using System;
+using System.Collections.Generic;
 
 namespace Earmark.Backend.Services
 {
     public interface IBudgetService
     {
+        /// <summary>
+        /// Gets all the budget months in the database.
+        /// </summary>
+        /// <returns>All the budget months in the database.</returns>
+        IEnumerable<BudgetMonth> GetBudgetMonths();
+
         /// <summary>
         /// Gets the budget month with the specified month and year.
         /// </summary>

@@ -55,6 +55,10 @@ namespace Earmark.Backend.Services
                 var dbContext = dbContextScope.DbContexts.Get<AppDbContext>();
 
                 var payee = dbContext.Payees.Find(payeeId);
+
+                if (payee is null)
+                    throw new ArgumentException("No payee with the specified ID was found."); 
+
                 dbContext.Entry(payee).Reference(x => x.TransferAccount).Load();
 
                 if (payee.TransferAccount is not null)

@@ -76,7 +76,10 @@ namespace Earmark.Backend.Services
 
                 var categoryGroup = dbContext.CategoryGroups
                     .Include(x => x.Categories)
-                    .First(x => x.Id == categoryGroupId);
+                    .FirstOrDefault(x => x.Id == categoryGroupId);
+
+                if (categoryGroup is null)
+                    throw new ArgumentException("No category group with the specified ID was found.");
 
                 var category = new Category()
                 {
